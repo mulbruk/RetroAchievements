@@ -5802,7 +5802,7 @@ leaderboard(
     always_true()
   ),
   value = measured(
-    (calendar_month() / 3 + calendar_year() * 366 + calendar_month() * 24 + calendar_day())
+    (calendar_month() / 3 + calendar_year() * 366 + calendar_month() * 24 + calendar_day() - 0x18)
   ),
   format = "VALUE",
   lower_is_better = true
@@ -5828,7 +5828,7 @@ leaderboard(
     always_true()
   ),
   value = measured(
-    (calendar_month() / 3 + calendar_year() * 366 + calendar_month() * 24 + calendar_day())
+    (calendar_month() / 3 + calendar_year() * 366 + calendar_month() * 24 + calendar_day() - 0x18)
   ),
   format = "VALUE",
   lower_is_better = true
@@ -5854,7 +5854,7 @@ leaderboard(
     always_true()
   ),
   value = measured(
-    (calendar_month() / 3 + calendar_year() * 366 + calendar_month() * 24 + calendar_day())
+    (calendar_month() / 3 + calendar_year() * 366 + calendar_month() * 24 + calendar_day() - 0x18)
   ),
   format = "VALUE",
   lower_is_better = true
