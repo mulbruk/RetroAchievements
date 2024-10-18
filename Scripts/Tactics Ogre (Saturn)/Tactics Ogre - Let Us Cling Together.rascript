@@ -1025,7 +1025,7 @@ function c3n_asyton_battle()    => bit_transition_1(bit7(0x0D3923))
 //   Bit6 = Qadriga Fortress: ("In truth, yes")
 //   Bit7 = Qadriga Fortress: ("I am no longer certain")
 
-function c3n_qadriga_battle() => bit_transition_1(bit5(0x0D3922))
+function c3n_qadriga_battle() => bit_transition_1(bit1(0x0D3922))
 
 // 0x0D3925: [8-bit bitfield] Event flags - Chapter 3 Neutral (4 / 7)
 //   Bit0 = Qadriga Fortress: ("I can't accept you")
@@ -1091,7 +1091,7 @@ function c3c_asyton_battle() => bit_transition_1(bit7(0x0D3926))
 
 function c3c_xeod_battle()        => bit_transition_1(bit0(0x0D3929))
 function c3c_coritanae_battle_1() => bit_transition_1(bit2(0x0D3929))
-function c3c_bahanna_battle_1()   => bit_transition_1(bit2(0x0D3929))
+function c3c_bahanna_battle_1()   => bit_transition_1(bit5(0x0D3929))
 
 // 0x0D3928: [8-bit bitfield] Event flags - Chapter 3 Chaos (3 / 5)
 //   Bit0 = Completed battle at Brigantys West Wall
@@ -1103,8 +1103,8 @@ function c3c_bahanna_battle_1()   => bit_transition_1(bit2(0x0D3929))
 //   Bit6 = Bahanna: ("I can't accept you")
 //   Bit7 = Completed battle at Coritanae Gates
 
-function c3c_xaebos_battle()   => bit_transition_1(bit2(0x0D3928))
-function c3c_bahanna_battle_2() => bit_transition_1(bit4(0x0D3928))
+function c3c_xaebos_battle()    => bit_transition_1(bit2(0x0D3928))
+function c3c_bahanna_battle_2() => bit_transition_1(bit3(0x0D3928))
 
 // 0x0D392B: [8-bit bitfield] Event flags - Chapter 3 Chaos (4 / 5)
 //   Bit0 = Completed battle at Coritanae Ward
@@ -1377,12 +1377,12 @@ function c4_belmorose_battle() =>                  bit4(0x0D393D)
 //   Bit2 = PotD: Completed Rudlum battle on floor 2
 //   Bit3 = PotD: Floor 2: Rudlum dead
 //   Bit4 = Potd: Completed Xadoba battle on floor 3
-//   Bit5 = ??
-//   Bit6 = ??
-//   Bit7 = PotD: Completed Nybeth battle on floor 4
+//   Bit5 = PotD: Completed Nybeth battle on floor 4 (neutral)
+//   Bit6 = PotD: Nybeth battle - Oelias and Nybeth dialogue
+//   Bit7 = PotD: Completed Nybeth battle on floor 4 (law / chaos)
 
 function c4_bortegun_battle() =>                  bit0(0x0D393C)
-function c4_potd_floor_4()    => bit_transition_1(bit7(0x0D393C))
+function c4_potd_floor_4()    => __ornext(bit_transition_1(bit5(0x0D393C)) || bit_transition_1(bit7(0x0D393C)))
 
 // 0x0D393F: [8-bit bitfield] Event flags - Chapter 4 / Sidequests (16 / 17)
 //   Bit0 = PotD: Floor 4 Leonar death dialogue
@@ -1505,14 +1505,14 @@ achievement(
   title = "If Someone Must Bloody Their Hands...", id = 425193,
   description = "Accept orders at Balmamusa, for the good of the Walister cause",
   type = "progression", points = 10,
-  trigger = event_flag_trigger(chapter_stable("C1"), c1_chaos_choice())
+  trigger = event_flag_trigger(chapter_stable("C1"), c1_law_choice())
 )
 
 achievement(
   title = "What Virtue Lies in This Madness?", id = 425194,
   description = "Refuse orders at Balmamusa and become an outlaw",
   type = "progression", points = 10,
-  trigger = event_flag_trigger(chapter_stable("C1"), c1_law_choice())
+  trigger = event_flag_trigger(chapter_stable("C1"), c1_chaos_choice())
 )
 
 // Chapter 2 (law) -------------
@@ -2304,7 +2304,7 @@ achievement(
 
 achievement(
   title = "Revolt",
-  description = "In a single attempt on hard mode, complete all battles in the assault on Almorica Castle in a single attempt on hard mode during chapter 2 on the law route",
+  description = "In a single attempt on hard mode, complete all battles in the assault on Almorica Castle during chapter 2 on the law route",
   points = 10,
   trigger = hard_mode_siege(
     [is_encounter("Almorica Gates 2L") && is_map("Almorica Gates")],
@@ -2317,7 +2317,7 @@ achievement(
 
 achievement(
   title = "Impregnable Defense",
-  description = "In a single attempt on hard mode, complete all battles in the assault on Phidoch Castle in a single attempt on hard mode during chapter 3 on the neutral route",
+  description = "In a single attempt on hard mode, complete all battles in the assault on Phidoch Castle during chapter 3 on the neutral route",
   points = 10,
   trigger = hard_mode_siege(
     [
@@ -2357,8 +2357,7 @@ achievement(
       is_encounter("Phidoch West") && is_map("Phidoch West")
     ],
     0x0E,
-    event_flag_trigger_no_load_protection(chapter_transition("C3L", "C4"), c3l_oz_battle()) &&
-    (is_map("Phidoch South") || is_map("Phidoch West")),
+    event_flag_trigger_no_load_protection(chapter_transition("C3L", "C4"), c3l_oz_battle()),
     "C3L",
     ["C3L", "C4"]
   )
@@ -2805,13 +2804,13 @@ function snapdragon_counterattack_restriction(n, element) => never(
 
 // Unit death detection ------------------------------------------------------------------------------
 // TODO the one remaining place this is used is redundant and should probably be removed
-function enemy_leader_defeated() => (
-  unit_is_special_targeted() &&
-  special_target_ptr() != prev(special_target_ptr()) &&
-  special_target_has_affiliation("Enemy") &&
-  special_target_is_leader() &&
-  special_target_dead()
-)
+// function enemy_leader_defeated() => (
+//   unit_is_special_targeted() &&
+//   special_target_ptr() != prev(special_target_ptr()) &&
+//   special_target_has_affiliation("Enemy") &&
+//   special_target_is_leader() &&
+//   special_target_dead()
+// )
 
 // function enemy_leader_very_dead() => (
 //   unit_is_special_targeted() &&
@@ -3037,7 +3036,7 @@ achievement(
         (
           unit_is_active() &&
           active_unit_has_affiliation("Friendly") &&
-          active_unit_index() != n &&
+          // active_unit_index() != n &&
           !was_active_character_state("EndTurn") &&
           is_active_character_state("EndTurn") &&
           battle_unit_hp(n) > 0 &&
@@ -3047,7 +3046,7 @@ achievement(
         (
           unit_is_active() &&
           active_unit_has_affiliation("Friendly") &&
-          active_unit_index() != n &&
+          // active_unit_index() != n &&
           !was_active_character_state("EndTurn") &&
           is_active_character_state("EndTurn") &&
           battle_unit_hp(n) > 0 &&
@@ -3057,7 +3056,7 @@ achievement(
         (
           unit_is_active() &&
           active_unit_has_affiliation("Friendly") &&
-          active_unit_index() != n &&
+          // active_unit_index() != n &&
           !was_active_character_state("EndTurn") &&
           is_active_character_state("EndTurn") &&
           battle_unit_hp(n) > 0 &&
@@ -3067,7 +3066,7 @@ achievement(
         (
           unit_is_active() &&
           active_unit_has_affiliation("Friendly") &&
-          active_unit_index() != n &&
+          // active_unit_index() != n &&
           !was_active_character_state("EndTurn") &&
           is_active_character_state("EndTurn") &&
           battle_unit_hp(n) > 0 &&
@@ -3085,83 +3084,99 @@ achievement(
       range(0, 19),
       n => (
         (
+          __ornext(
+            battle_unit_hp(n) > 0 ||
+            battle_unit_id(n) == CharacterID["Vyce (Rhime)"]
+          ) &&
           active_unit_has_affiliation("Friendly") &&
-          active_unit_index() != n &&
+          // active_unit_index() != n &&
           event_script_trigger(0x0114) &&
-          battle_unit_hp(n) > 0 &&
+          // battle_unit_hp(n) > 0 &&
           (active_unit_x() - battle_unit_x(n)) == 1 &&
           (active_unit_y() - battle_unit_y(n)) == 0
         ) ||
         (
+          __ornext(
+            battle_unit_hp(n) > 0 ||
+            battle_unit_id(n) == CharacterID["Vyce (Rhime)"]
+          ) &&
           active_unit_has_affiliation("Friendly") &&
-          active_unit_index() != n &&
+          // active_unit_index() != n &&
           event_script_trigger(0x0114) &&
-          battle_unit_hp(n) > 0 &&
+          // battle_unit_hp(n) > 0 &&
           (battle_unit_x(n) - active_unit_x()) == 1 &&
           (active_unit_y() - battle_unit_y(n)) == 0
         ) ||
         (
+          __ornext(
+            battle_unit_hp(n) > 0 ||
+            battle_unit_id(n) == CharacterID["Vyce (Rhime)"]
+          ) &&
           active_unit_has_affiliation("Friendly") &&
-          active_unit_index() != n &&
+          // active_unit_index() != n &&
           event_script_trigger(0x0114) &&
-          battle_unit_hp(n) > 0 &&
+          // battle_unit_hp(n) > 0 &&
           (active_unit_x() - battle_unit_x(n)) == 0 &&
           (active_unit_y() - battle_unit_y(n)) == 1
         ) ||
         (
+          __ornext(
+            battle_unit_hp(n) > 0 ||
+            battle_unit_id(n) == CharacterID["Vyce (Rhime)"]
+          ) &&
           active_unit_has_affiliation("Friendly") &&
-          active_unit_index() != n &&
+          // active_unit_index() != n &&
           event_script_trigger(0x0114) &&
-          battle_unit_hp(n) > 0 &&
+          // battle_unit_hp(n) > 0 &&
           (active_unit_x() - battle_unit_x(n)) == 0 &&
           (battle_unit_y(n) - active_unit_y()) == 1
         )
       )
     )
-  ) &&
+  ) // &&
   // When the final blow is landed on Vyce, his HP goes to 0 so the above logic considers him not to
   // be present for the adjacency check. However, he delivers a speech upon 0HP rather than his sprite
   // vanishing, so it feels wrong not to reset the achievement when landing the final blow standing
   // next to him.
-  never(
-    any_of(
-      range(0, 19),
-      n => (
-        (
-          active_unit_has_affiliation("Friendly") &&
-          active_unit_index() != n &&
-          event_script_trigger(0x0114) &&
-          battle_unit_id(n) == CharacterID["Vyce (Rhime)"] &&
-          (active_unit_x() - battle_unit_x(n)) == 1 &&
-          (active_unit_y() - battle_unit_y(n)) == 0
-        ) ||
-        (
-          active_unit_has_affiliation("Friendly") &&
-          active_unit_index() != n &&
-          event_script_trigger(0x0114) &&
-          battle_unit_id(n) == CharacterID["Vyce (Rhime)"] &&
-          (battle_unit_x(n) - active_unit_x()) == 1 &&
-          (active_unit_y() - battle_unit_y(n)) == 0
-        ) ||
-        (
-          active_unit_has_affiliation("Friendly") &&
-          active_unit_index() != n &&
-          event_script_trigger(0x0114) &&
-          battle_unit_id(n) == CharacterID["Vyce (Rhime)"] &&
-          (active_unit_x() - battle_unit_x(n)) == 0 &&
-          (active_unit_y() - battle_unit_y(n)) == 1
-        ) ||
-        (
-          active_unit_has_affiliation("Friendly") &&
-          active_unit_index() != n &&
-          event_script_trigger(0x0114) &&
-          battle_unit_id(n) == CharacterID["Vyce (Rhime)"] &&
-          (active_unit_x() - battle_unit_x(n)) == 0 &&
-          (battle_unit_y(n) - active_unit_y()) == 1
-        )
-      )
-    )
-  )
+  // never(
+  //   any_of(
+  //     range(0, 19),
+  //     n => (
+  //       (
+  //         active_unit_has_affiliation("Friendly") &&
+  //         active_unit_index() != n &&
+  //         event_script_trigger(0x0114) &&
+  //         battle_unit_id(n) == CharacterID["Vyce (Rhime)"] &&
+  //         (active_unit_x() - battle_unit_x(n)) == 1 &&
+  //         (active_unit_y() - battle_unit_y(n)) == 0
+  //       ) ||
+  //       (
+  //         active_unit_has_affiliation("Friendly") &&
+  //         active_unit_index() != n &&
+  //         event_script_trigger(0x0114) &&
+  //         battle_unit_id(n) == CharacterID["Vyce (Rhime)"] &&
+  //         (battle_unit_x(n) - active_unit_x()) == 1 &&
+  //         (active_unit_y() - battle_unit_y(n)) == 0
+  //       ) ||
+  //       (
+  //         active_unit_has_affiliation("Friendly") &&
+  //         active_unit_index() != n &&
+  //         event_script_trigger(0x0114) &&
+  //         battle_unit_id(n) == CharacterID["Vyce (Rhime)"] &&
+  //         (active_unit_x() - battle_unit_x(n)) == 0 &&
+  //         (active_unit_y() - battle_unit_y(n)) == 1
+  //       ) ||
+  //       (
+  //         active_unit_has_affiliation("Friendly") &&
+  //         active_unit_index() != n &&
+  //         event_script_trigger(0x0114) &&
+  //         battle_unit_id(n) == CharacterID["Vyce (Rhime)"] &&
+  //         (active_unit_x() - battle_unit_x(n)) == 0 &&
+  //         (battle_unit_y(n) - active_unit_y()) == 1
+  //       )
+  //     )
+  //   )
+  // )
 )
 
 // -----------------------------
@@ -3829,89 +3844,207 @@ achievement(
   never(
     challenge_reset("BarniciaCourtyard", "Barbas")
   ) &&
+
   never(
-    tally(
-      1,
-      deduct(
-        __ornext(
-          is_active_character_state("AttackTarget") || is_active_character_state("Spellcast")
-        ) &&
-        unit_is_active() &&
-        active_unit_has_affiliation("Friendly") &&
-        battle_menu_is_closed() &&
-        !unit_has_attacked() &&
-        unit_is_targeted() &&
-        target_unit_ptr() != active_unit_ptr() &&
-        (active_unit_x() - target_unit_x()) == 0 &&
-        (active_unit_y() - target_unit_y()) == 1
-      ),
-      deduct(
-        __ornext(
-          is_active_character_state("AttackTarget") || is_active_character_state("Spellcast")
-        ) &&
-        unit_is_active() &&
-        active_unit_has_affiliation("Friendly") &&
-        battle_menu_is_closed() &&
-        !unit_has_attacked() &&
-        unit_is_targeted() &&
-        target_unit_ptr() != active_unit_ptr() &&
-        (active_unit_x() - target_unit_x()) == 0 &&
-        (target_unit_y() - active_unit_y()) == 1
-      ),
-      deduct(
-        __ornext(
-          is_active_character_state("AttackTarget") || is_active_character_state("Spellcast")
-        ) &&
-        unit_is_active() &&
-        active_unit_has_affiliation("Friendly") &&
-        battle_menu_is_closed() &&
-        !unit_has_attacked() &&
-        unit_is_targeted() &&
-        target_unit_ptr() != active_unit_ptr() &&
-        (active_unit_x() - target_unit_x()) == 1 &&
-        (active_unit_y() - target_unit_y()) == 0
-      ),
-      deduct(
-        __ornext(
-          is_active_character_state("AttackTarget") || is_active_character_state("Spellcast")
-        ) &&
-        unit_is_active() &&
-        active_unit_has_affiliation("Friendly") &&
-        battle_menu_is_closed() &&
-        !unit_has_attacked() &&
-        unit_is_targeted() &&
-        target_unit_ptr() != active_unit_ptr() &&
-        (target_unit_x() - active_unit_x()) == 1 &&
-        (active_unit_y() - target_unit_y()) == 0
-      ),
-      (
-        __ornext(
-          is_active_character_state("AttackTarget") || is_active_character_state("Spellcast")
-        ) &&
-        unit_is_active() &&
-        active_unit_has_affiliation("Friendly") &&
-        battle_menu_is_closed() &&
-        !unit_has_attacked() &&
-        unit_is_targeted() &&
-        target_unit_ptr() != active_unit_ptr()
-      )
-    )
+    __ornext(
+        is_active_character_state("AttackTarget") || is_active_character_state("Spellcast")
+      ) &&
+      unit_is_active() &&
+      active_unit_has_affiliation("Friendly") &&
+      battle_menu_is_closed() &&
+      !unit_has_attacked() &&
+      unit_is_targeted() &&
+      target_unit_ptr() != active_unit_ptr() &&
+      (active_unit_x() - target_unit_x()) >  1 &&
+      (active_unit_y() - target_unit_y()) == 0
+  ) &&
+  never(
+    __ornext(
+        is_active_character_state("AttackTarget") || is_active_character_state("Spellcast")
+      ) &&
+      unit_is_active() &&
+      active_unit_has_affiliation("Friendly") &&
+      battle_menu_is_closed() &&
+      !unit_has_attacked() &&
+      unit_is_targeted() &&
+      target_unit_ptr() != active_unit_ptr() &&
+      (target_unit_x() - active_unit_x()) >  1 &&
+      (active_unit_y() - target_unit_y()) == 0
+  ) &&
+  never(
+    __ornext(
+        is_active_character_state("AttackTarget") || is_active_character_state("Spellcast")
+      ) &&
+      unit_is_active() &&
+      active_unit_has_affiliation("Friendly") &&
+      battle_menu_is_closed() &&
+      !unit_has_attacked() &&
+      unit_is_targeted() &&
+      target_unit_ptr() != active_unit_ptr() &&
+      (active_unit_x() - target_unit_x()) == 0 &&
+      (active_unit_y() - target_unit_y()) >  1
+  ) &&
+  never(
+    __ornext(
+        is_active_character_state("AttackTarget") || is_active_character_state("Spellcast")
+      ) &&
+      unit_is_active() &&
+      active_unit_has_affiliation("Friendly") &&
+      battle_menu_is_closed() &&
+      !unit_has_attacked() &&
+      unit_is_targeted() &&
+      target_unit_ptr() != active_unit_ptr() &&
+      (active_unit_x() - target_unit_x()) == 0 &&
+      (target_unit_y() - active_unit_y()) >  1
+  ) &&
+  
+  never(
+    __ornext(
+        is_active_character_state("AttackTarget") || is_active_character_state("Spellcast")
+      ) &&
+      unit_is_active() &&
+      active_unit_has_affiliation("Friendly") &&
+      battle_menu_is_closed() &&
+      !unit_has_attacked() &&
+      unit_is_targeted() &&
+      target_unit_ptr() != active_unit_ptr() &&
+      (active_unit_x() - target_unit_x()) >= 1 &&
+      (active_unit_y() - target_unit_y()) >= 1
+  ) &&
+  never(
+    __ornext(
+        is_active_character_state("AttackTarget") || is_active_character_state("Spellcast")
+      ) &&
+      unit_is_active() &&
+      active_unit_has_affiliation("Friendly") &&
+      battle_menu_is_closed() &&
+      !unit_has_attacked() &&
+      unit_is_targeted() &&
+      target_unit_ptr() != active_unit_ptr() &&
+      (target_unit_x() - active_unit_x()) >= 1 &&
+      (active_unit_y() - target_unit_y()) >= 1
+  ) &&
+  never(
+    __ornext(
+        is_active_character_state("AttackTarget") || is_active_character_state("Spellcast")
+      ) &&
+      unit_is_active() &&
+      active_unit_has_affiliation("Friendly") &&
+      battle_menu_is_closed() &&
+      !unit_has_attacked() &&
+      unit_is_targeted() &&
+      target_unit_ptr() != active_unit_ptr() &&
+      (target_unit_x() - active_unit_x()) >= 1 &&
+      (target_unit_y() - active_unit_y()) >= 1
+  ) &&
+  never(
+    __ornext(
+        is_active_character_state("AttackTarget") || is_active_character_state("Spellcast")
+      ) &&
+      unit_is_active() &&
+      active_unit_has_affiliation("Friendly") &&
+      battle_menu_is_closed() &&
+      !unit_has_attacked() &&
+      unit_is_targeted() &&
+      target_unit_ptr() != active_unit_ptr() &&
+      (active_unit_x() - target_unit_x()) >= 1 &&
+      (target_unit_y() - active_unit_y()) >= 1
   )
+  // never(
+  //   tally(
+  //     1,
+  //     deduct(
+  //       __ornext(
+  //         is_active_character_state("AttackTarget") || is_active_character_state("Spellcast")
+  //       ) &&
+  //       unit_is_active() &&
+  //       active_unit_has_affiliation("Friendly") &&
+  //       battle_menu_is_closed() &&
+  //       !unit_has_attacked() &&
+  //       unit_is_targeted() &&
+  //       target_unit_ptr() != active_unit_ptr() &&
+  //       (active_unit_x() - target_unit_x()) == 0 &&
+  //       (active_unit_y() - target_unit_y()) == 1
+  //     ),
+  //     deduct(
+  //       __ornext(
+  //         is_active_character_state("AttackTarget") || is_active_character_state("Spellcast")
+  //       ) &&
+  //       unit_is_active() &&
+  //       active_unit_has_affiliation("Friendly") &&
+  //       battle_menu_is_closed() &&
+  //       !unit_has_attacked() &&
+  //       unit_is_targeted() &&
+  //       target_unit_ptr() != active_unit_ptr() &&
+  //       (active_unit_x() - target_unit_x()) == 0 &&
+  //       (target_unit_y() - active_unit_y()) == 1
+  //     ),
+  //     deduct(
+  //       __ornext(
+  //         is_active_character_state("AttackTarget") || is_active_character_state("Spellcast")
+  //       ) &&
+  //       unit_is_active() &&
+  //       active_unit_has_affiliation("Friendly") &&
+  //       battle_menu_is_closed() &&
+  //       !unit_has_attacked() &&
+  //       unit_is_targeted() &&
+  //       target_unit_ptr() != active_unit_ptr() &&
+  //       (active_unit_x() - target_unit_x()) == 1 &&
+  //       (active_unit_y() - target_unit_y()) == 0
+  //     ),
+  //     deduct(
+  //       __ornext(
+  //         is_active_character_state("AttackTarget") || is_active_character_state("Spellcast")
+  //       ) &&
+  //       unit_is_active() &&
+  //       active_unit_has_affiliation("Friendly") &&
+  //       battle_menu_is_closed() &&
+  //       !unit_has_attacked() &&
+  //       unit_is_targeted() &&
+  //       target_unit_ptr() != active_unit_ptr() &&
+  //       (target_unit_x() - active_unit_x()) == 1 &&
+  //       (active_unit_y() - target_unit_y()) == 0
+  //     ),
+  //     (
+  //       __ornext(
+  //         is_active_character_state("AttackTarget") || is_active_character_state("Spellcast")
+  //       ) &&
+  //       unit_is_active() &&
+  //       active_unit_has_affiliation("Friendly") &&
+  //       battle_menu_is_closed() &&
+  //       !unit_has_attacked() &&
+  //       unit_is_targeted() &&
+  //       target_unit_ptr() != active_unit_ptr()
+  //     )
+  //   )
+  // )
 )
 
+function prev_battle_unit_hp(n) => prev(word(0x0D9650 + n * 0x6C + 0x06))
+function prev_battle_unit_x(n)  => prev(byte(0x0D9650 + n * 0x6C + 0x4E))
+function prev_battle_unit_y(n)  => prev(byte(0x0D9650 + n * 0x6C + 0x4F))
+
 function luct_adjacency_requirements() {
-  foo = array_map(range(0, 80), n => always_false())
-  foo[80] = (
+  foo = array_map(range(0, 161), n => always_false())
+  
+  foo[160] = (
     unit_is_active() &&
     active_unit_has_affiliation("Friendly") &&
     !was_active_character_state("EndTurn") &&
     is_active_character_state("EndTurn")
   )
+  foo[161] = deduct(
+    prior(active_unit_ptr()) != 0xFFFF &&
+    is_active_character_state("EndTurn") &&
+    prev(active_unit_ptr()) != active_unit_ptr() &&
+    byte(prev(active_unit_ptr()) * 0x6C + 0x0D9674) == Affiliation["Friendly"]
+  )
+
   for n in range(0, 19) {
-    foo[4 * n] = deduct(
+    foo[8 * n] = deduct(
       unit_is_active() &&
       active_unit_has_affiliation("Friendly") &&
-      active_unit_index() != n &&
+      // active_unit_index() != n &&
       !was_active_character_state("EndTurn") &&
       is_active_character_state("EndTurn") &&
       battle_unit_hp(n) > 0 &&
@@ -3919,10 +4052,21 @@ function luct_adjacency_requirements() {
       (active_unit_x() - battle_unit_x(n)) == 1 &&
       (active_unit_y() - battle_unit_y(n)) == 0
     )
-    foo[4 * n + 1] = deduct(
+    foo[8 * n + 1] = (
+      prior(active_unit_ptr()) != 0xFFFF &&
+      is_active_character_state("EndTurn") &&
+      prev(active_unit_ptr()) != active_unit_ptr() &&
+      byte(prev(active_unit_ptr()) * 0x6C + 0x0D9674) == Affiliation["Friendly"] &&
+      // word(prev(active_unit_ptr()) * 0x6C + 0x0D96B8) != n && // active_unit_index
+      prev_battle_unit_hp(n) > 0 &&
+
+      (byte(prev(active_unit_ptr()) * 0x6C + 0x0D969E) - prev_battle_unit_x(n)) == 1 &&
+      (byte(prev(active_unit_ptr()) * 0x6C + 0x0D969F) - prev_battle_unit_y(n)) == 0
+    )
+    foo[8 * n + 2] = deduct(
       unit_is_active() &&
       active_unit_has_affiliation("Friendly") &&
-      active_unit_index() != n &&
+      // active_unit_index() != n &&
       !was_active_character_state("EndTurn") &&
       is_active_character_state("EndTurn") &&
       battle_unit_hp(n) > 0 &&
@@ -3930,10 +4074,21 @@ function luct_adjacency_requirements() {
       (battle_unit_x(n) - active_unit_x()) == 1 &&
       (active_unit_y() - battle_unit_y(n)) == 0
     )
-    foo[4 * n + 2] = deduct(
+    foo[8 * n + 3] = (
+      prior(active_unit_ptr()) != 0xFFFF &&
+      is_active_character_state("EndTurn") &&
+      prev(active_unit_ptr()) != active_unit_ptr() &&
+      byte(prev(active_unit_ptr()) * 0x6C + 0x0D9674) == Affiliation["Friendly"] &&
+      // word(prev(active_unit_ptr()) * 0x6C + 0x0D96B8) != n && // active_unit_index
+      prev_battle_unit_hp(n) > 0 &&
+
+      (prev_battle_unit_x(n) - byte(prev(active_unit_ptr()) * 0x6C + 0x0D969E)) == 1 &&
+      (byte(prev(active_unit_ptr()) * 0x6C + 0x0D969F) - prev_battle_unit_y(n)) == 0
+    )
+    foo[8 * n + 4] = deduct(
       unit_is_active() &&
       active_unit_has_affiliation("Friendly") &&
-      active_unit_index() != n &&
+      // active_unit_index() != n &&
       !was_active_character_state("EndTurn") &&
       is_active_character_state("EndTurn") &&
       battle_unit_hp(n) > 0 &&
@@ -3941,16 +4096,38 @@ function luct_adjacency_requirements() {
       (active_unit_x() - battle_unit_x(n)) == 0 &&
       (active_unit_y() - battle_unit_y(n)) == 1
     )
-    foo[4 * n + 3] = deduct(
+    foo[8 * n + 5] = (
+      prior(active_unit_ptr()) != 0xFFFF &&
+      is_active_character_state("EndTurn") &&
+      prev(active_unit_ptr()) != active_unit_ptr() &&
+      byte(prev(active_unit_ptr()) * 0x6C + 0x0D9674) == Affiliation["Friendly"] &&
+      // word(prev(active_unit_ptr()) * 0x6C + 0x0D96B8) != n && // active_unit_index
+      prev_battle_unit_hp(n) > 0 &&
+
+      (byte(prev(active_unit_ptr()) * 0x6C + 0x0D969E) - prev_battle_unit_x(n)) == 0 &&
+      (byte(prev(active_unit_ptr()) * 0x6C + 0x0D969F) - prev_battle_unit_y(n)) == 1
+    )
+    foo[8 * n + 6] = deduct(
       unit_is_active() &&
       active_unit_has_affiliation("Friendly") &&
-      active_unit_index() != n &&
+      // active_unit_index() != n &&
       !was_active_character_state("EndTurn") &&
       is_active_character_state("EndTurn") &&
-      battle_unit_hp(n) > 0 &&
+      prev_battle_unit_hp(n) > 0 &&
 
       (active_unit_x() - battle_unit_x(n)) == 0 &&
       (battle_unit_y(n) - active_unit_y()) == 1
+    )
+    foo[8 * n + 7] = (
+      prior(active_unit_ptr()) != 0xFFFF &&
+      is_active_character_state("EndTurn") &&
+      prev(active_unit_ptr()) != active_unit_ptr() &&
+      byte(prior(active_unit_ptr()) * 0x6C + 0x0D9674) == Affiliation["Friendly"] &&
+      // word(prev(active_unit_ptr()) * 0x6C + 0x0D96B8) != n && // active_unit_index
+      battle_unit_hp(n) > 0 &&
+
+      (byte(prev(active_unit_ptr()) * 0x6C + 0x0D969E) - prev_battle_unit_x(n)) == 0 &&
+      (prev_battle_unit_y(n) - byte(prev(active_unit_ptr()) * 0x6C + 0x0D969F)) == 1
     )
   }
 
@@ -3974,7 +4151,7 @@ function luct_final_turn_adjacency_requirements() {
       event_script_multi_trigger([0x026A, 0x026E]) &&
       unit_is_active() &&
       active_unit_has_affiliation("Friendly") &&
-      active_unit_index() != n &&
+      // active_unit_index() != n &&
       battle_unit_hp(n) > 0 &&
       (active_unit_x() - battle_unit_x(n)) == 1 &&
       (active_unit_y() - battle_unit_y(n)) == 0
@@ -3983,7 +4160,7 @@ function luct_final_turn_adjacency_requirements() {
       event_script_multi_trigger([0x026A, 0x026E]) &&
       unit_is_active() &&
       active_unit_has_affiliation("Friendly") &&
-      active_unit_index() != n &&
+      // active_unit_index() != n &&
       battle_unit_class(n) == 0x041 &&
       (active_unit_x() - battle_unit_x(n)) == 1 &&
       (active_unit_y() - battle_unit_y(n)) == 0
@@ -3993,7 +4170,7 @@ function luct_final_turn_adjacency_requirements() {
       event_script_multi_trigger([0x026A, 0x026E]) &&
       unit_is_active() &&
       active_unit_has_affiliation("Friendly") &&
-      active_unit_index() != n &&
+      // active_unit_index() != n &&
       battle_unit_hp(n) > 0 &&
       (battle_unit_x(n) - active_unit_x()) == 1 &&
       (active_unit_y() - battle_unit_y(n)) == 0
@@ -4002,7 +4179,7 @@ function luct_final_turn_adjacency_requirements() {
       event_script_multi_trigger([0x026A, 0x026E]) &&
       unit_is_active() &&
       active_unit_has_affiliation("Friendly") &&
-      active_unit_index() != n &&
+      // active_unit_index() != n &&
       battle_unit_class(n) == 0x041 &&
       (battle_unit_x(n) - active_unit_x()) == 1 &&
       (active_unit_y() - battle_unit_y(n)) == 0
@@ -4012,7 +4189,7 @@ function luct_final_turn_adjacency_requirements() {
       event_script_multi_trigger([0x026A, 0x026E]) &&
       unit_is_active() &&
       active_unit_has_affiliation("Friendly") &&
-      active_unit_index() != n &&
+      // active_unit_index() != n &&
       battle_unit_hp(n) > 0 &&
       (active_unit_x() - battle_unit_x(n)) == 0 &&
       (active_unit_y() - battle_unit_y(n)) == 1
@@ -4021,7 +4198,7 @@ function luct_final_turn_adjacency_requirements() {
       event_script_multi_trigger([0x026A, 0x026E]) &&
       unit_is_active() &&
       active_unit_has_affiliation("Friendly") &&
-      active_unit_index() != n &&
+      // active_unit_index() != n &&
       battle_unit_class(n) == 0x041 &&
       (active_unit_x() - battle_unit_x(n)) == 0 &&
       (active_unit_y() - battle_unit_y(n)) == 1
@@ -4031,7 +4208,7 @@ function luct_final_turn_adjacency_requirements() {
       event_script_multi_trigger([0x026A, 0x026E]) &&
       unit_is_active() &&
       active_unit_has_affiliation("Friendly") &&
-      active_unit_index() != n &&
+      // active_unit_index() != n &&
       battle_unit_hp(n) > 0 &&
       (active_unit_x() - battle_unit_x(n)) == 0 &&
       (battle_unit_y(n) - active_unit_y()) == 1
@@ -4040,7 +4217,7 @@ function luct_final_turn_adjacency_requirements() {
       event_script_multi_trigger([0x026A, 0x026E]) &&
       unit_is_active() &&
       active_unit_has_affiliation("Friendly") &&
-      active_unit_index() != n &&
+      // active_unit_index() != n &&
       battle_unit_class(n) == 0x041 &&
       (active_unit_x() - battle_unit_x(n)) == 0 &&
       (battle_unit_y(n) - active_unit_y()) == 1
@@ -4621,10 +4798,10 @@ achievement(
       challenge_reset("Tomb - Dorgalua", "Dorgalua")
     ) &&
     // TODO this condition is no longer needed and should be removed
-    never(
-      !active_unit_is_character("Catiua") &&
-      enemy_leader_defeated()
-    ) &&
+    // never(
+    //   !active_unit_is_character("Catiua") &&
+    //   enemy_leader_defeated()
+    // ) &&
     never(
       is_event_script(0x02E1) &&
       !active_unit_is_character("Catiua")
@@ -5006,10 +5183,14 @@ achievement(
   trigger = (
     is_game_state("Field Program") &&
     battle_active() &&
-    combat_action() == CombatActions["Persuade"] &&
-    unit_is_special_targeted() &&
-    special_target() == prev(special_target()) &&
-    special_target_affiliation_change()
+    unit_is_active() &&
+    active_unit_has_affiliation("Friendly") &&
+    prev(string_id()) != 0x0060 &&
+    string_id() == 0x0060
+    // combat_action() == CombatActions["Persuade"] &&
+    // unit_is_special_targeted() &&
+    // special_target() == prev(special_target()) &&
+    // special_target_affiliation_change()
   )
 )
 
@@ -5292,6 +5473,28 @@ hanging_gardens = {
   0x1503: "Chamber of the Seal",
 }
 
+// month_names = {
+//   0x01: "God",
+//   0x02: "Earth",
+//   0x03: "Water",
+//   0x04: "Shadow",
+//   0x05: "White",
+//   0x06: "Flame",
+//   0x07: "Wind",
+//   0x08: "Gold",
+//   0x09: "Storm",
+//   0x0A: "Dark",
+//   0x0B: "Sea",
+//   0x0C: "Black",
+//   0x0D: "Twin",
+//   0x0E: "Fire",
+//   0x0F: "Light",
+// }
+
+days_singular = {
+  0x01: "day"
+}
+
 hard_mode = {
   0x00: "",
   0x01: " • Hard mode",
@@ -5304,6 +5507,8 @@ function is_mid_potd() => location() == 0x00 && chapter() == ChapterID["C4"] && 
 function is_gardens()  => location() == 0x20
 
 function hard_mode() => byte(0x1FFC01)
+
+function days_elapsed() => (calendar_month() / 3 + calendar_year() * 366 + calendar_month() * 24 + calendar_day() - 0x18)
 
 chapter_name = {
   0x00: "Chapter 1",
@@ -5506,109 +5711,133 @@ rich_presence_conditional_display(
 
 rich_presence_conditional_display(
   is_world_map() && is_mid_potd(),
-  "{0} • World map • Palace of the Dead - Floor {1} • {2}{3}",
+  "{0} • World map • Palace of the Dead - Floor {1} • {2} • Campaign length: {4} {5}{3}",
   rich_presence_lookup("Chapter",  chapter(),  chapter_name, "Chapter ??"),
   rich_presence_value("Floor", potd_floor()),
   rich_presence_value("Time", in_game_time(), "FRAMES"),
-  rich_presence_lookup("HardMode", hard_mode(), hard_mode, "")
+  rich_presence_lookup("HardMode", hard_mode(), hard_mode, ""),
+  rich_presence_value("CampaignLength", days_elapsed()),
+  rich_presence_lookup("Days", days_elapsed(), days_singular, "days")
 )
 
 rich_presence_conditional_display(
   is_world_map(),
-  "{0} • World map • {1} • {2}{3}",
+  "{0} • World map • {1} • {2} • Campaign length: {4} {5}{3}",
   rich_presence_lookup("Chapter",  chapter(),  chapter_name, "Chapter ??"),
   rich_presence_lookup("Location", location(), map_location, "Unknown Location"),
   rich_presence_value("Time", in_game_time(), "FRAMES"),
-  rich_presence_lookup("HardMode", hard_mode(), hard_mode, "")
+  rich_presence_lookup("HardMode", hard_mode(), hard_mode, ""),
+  rich_presence_value("CampaignLength", days_elapsed()),
+  rich_presence_lookup("Days", days_elapsed(), days_singular, "days")
 )
 
 rich_presence_conditional_display(
   is_warren_report(),
-  "{0} • Warren Report • {1} • {2}{3}",
+  "{0} • Warren Report • {1} • {2} • Campaign length: {4} {5}{3}",
   rich_presence_lookup("Chapter",  chapter(),  chapter_name, "Chapter ??"),
   rich_presence_lookup("Location", location(), map_location, "Unknown Location"),
   rich_presence_value("Time", in_game_time(), "FRAMES"),
-  rich_presence_lookup("HardMode", hard_mode(), hard_mode, "")
+  rich_presence_lookup("HardMode", hard_mode(), hard_mode, ""),
+  rich_presence_value("CampaignLength", days_elapsed()),
+  rich_presence_lookup("Days", days_elapsed(), days_singular, "days")
 )
 
 rich_presence_conditional_display(
   is_deploying_units() && is_potd(),
-  "{0} • Preparing to take the field • Palace of the Dead - Floor {1} • {2}{3}",
+  "{0} • Preparing to take the field • Palace of the Dead - Floor {1} • {2} • Campaign length: {4} {5}{3}",
   rich_presence_lookup("Chapter",  chapter(),  chapter_name, "Chapter ??"),
   rich_presence_value("Floor", potd_floor()),
   rich_presence_value("Time", in_game_time(), "FRAMES"),
-  rich_presence_lookup("HardMode", hard_mode(), hard_mode, "")
+  rich_presence_lookup("HardMode", hard_mode(), hard_mode, ""),
+  rich_presence_value("CampaignLength", days_elapsed()),
+  rich_presence_lookup("Days", days_elapsed(), days_singular, "days")
 )
 
 rich_presence_conditional_display(
   is_deploying_units() && is_gardens(),
-  "{0} • Preparing to take the field • Hanging Gardens - {1} • {2}{3}",
+  "{0} • Preparing to take the field • Hanging Gardens - {1} • {2} • Campaign length: {4} {5}{3}",
   rich_presence_lookup("Chapter", chapter(), chapter_name,    "Chapter ??"),
   rich_presence_lookup("Gardens", map_id(),   hanging_gardens, "Hanging Gardens"),
   rich_presence_value("Time", in_game_time(), "FRAMES"),
-  rich_presence_lookup("HardMode", hard_mode(), hard_mode, "")
+  rich_presence_lookup("HardMode", hard_mode(), hard_mode, ""),
+  rich_presence_value("CampaignLength", days_elapsed()),
+  rich_presence_lookup("Days", days_elapsed(), days_singular, "days")
 )
 
 rich_presence_conditional_display(
   is_deploying_units() ,
-  "{0} • Preparing to take the field • {1} • {2}{3}",
+  "{0} • Preparing to take the field • {1} • {2} • Campaign length: {4} {5}{3}",
   rich_presence_lookup("Chapter", chapter(), chapter_name,    "Chapter ??"),
   rich_presence_lookup("Location", location(), map_location, "Unknown Location"),
   rich_presence_value("Time", in_game_time(), "FRAMES"),
-  rich_presence_lookup("HardMode", hard_mode(), hard_mode, "")
+  rich_presence_lookup("HardMode", hard_mode(), hard_mode, ""),
+  rich_presence_value("CampaignLength", days_elapsed()),
+  rich_presence_lookup("Days", days_elapsed(), days_singular, "days")
 )
 
 rich_presence_conditional_display(
   is_shop(),
-  "{0} • Shopping • {1} • {2}{3}",
+  "{0} • Shopping • {1} • {2} • Campaign length: {4} {5}{3}",
   rich_presence_lookup("Chapter",  chapter(),  chapter_name, "Chapter ??"),
   rich_presence_lookup("Location", location(), map_location, "Unknown Location"),
   rich_presence_value("Time", in_game_time(), "FRAMES"),
-  rich_presence_lookup("HardMode", hard_mode(), hard_mode, "")
+  rich_presence_lookup("HardMode", hard_mode(), hard_mode, ""),
+  rich_presence_value("CampaignLength", days_elapsed()),
+  rich_presence_lookup("Days", days_elapsed(), days_singular, "days")
 )
 
 rich_presence_conditional_display(
   is_edit_screen() && is_mid_potd(),
-  "{0} • Editing units • Palace of the Dead - Floor {1} • {2}{3}",
+  "{0} • Editing units • Palace of the Dead - Floor {1} • {2} • Campaign length: {4} {5}{3}",
   rich_presence_lookup("Chapter",  chapter(),  chapter_name, "Chapter ??"),
   rich_presence_value("Floor", potd_floor()),
   rich_presence_value("Time", in_game_time(), "FRAMES"),
-  rich_presence_lookup("HardMode", hard_mode(), hard_mode, "")
+  rich_presence_lookup("HardMode", hard_mode(), hard_mode, ""),
+  rich_presence_value("CampaignLength", days_elapsed()),
+  rich_presence_lookup("Days", days_elapsed(), days_singular, "days")
 )
 
 rich_presence_conditional_display(
   is_editing_screen_final_battle(),
-  "{0} • Editing units • {1} • {2}{3}",
+  "{0} • Editing units • {1} • {2} • Campaign length: {4} {5}{3}",
   rich_presence_lookup("Chapter",  chapter(),  chapter_name, "Chapter ??"),
   rich_presence_lookup("Location", location(), map_location, "Unknown Location"),
   rich_presence_value("Time", in_game_time(), "FRAMES"),
-  rich_presence_lookup("HardMode", hard_mode(), hard_mode, "")
+  rich_presence_lookup("HardMode", hard_mode(), hard_mode, ""),
+  rich_presence_value("CampaignLength", days_elapsed()),
+  rich_presence_lookup("Days", days_elapsed(), days_singular, "days")
 )
 
 rich_presence_conditional_display(
   is_edit_screen(),
-  "{0} • Editing units • {1} • {2}{3}",
+  "{0} • Editing units • {1} • {2} • Campaign length: {4} {5}{3}",
   rich_presence_lookup("Chapter",  chapter(),  chapter_name, "Chapter ??"),
   rich_presence_lookup("Location", location(), map_location, "Unknown Location"),
   rich_presence_value("Time", in_game_time(), "FRAMES"),
-  rich_presence_lookup("HardMode", hard_mode(), hard_mode, "")
+  rich_presence_lookup("HardMode", hard_mode(), hard_mode, ""),
+  rich_presence_value("CampaignLength", days_elapsed()),
+  rich_presence_lookup("Days", days_elapsed(), days_singular, "days")
 )
 
 rich_presence_conditional_display(
   is_examining_units(),
-  "{0} • Examining units • {1} • {2}{3}",
+  "{0} • Examining units • {1} • {2} • Campaign length: {4} {5}{3}",
   rich_presence_lookup("Chapter",  chapter(),  chapter_name, "Chapter ??"),
   rich_presence_lookup("Location", location(), map_location, "Unknown Location"),
   rich_presence_value("Time", in_game_time(), "FRAMES"),
-  rich_presence_lookup("HardMode", hard_mode(), hard_mode, "")
+  rich_presence_lookup("HardMode", hard_mode(), hard_mode, ""),
+  rich_presence_value("CampaignLength", days_elapsed()),
+  rich_presence_lookup("Days", days_elapsed(), days_singular, "days")
 )
 
 rich_presence_conditional_display(
   is_first_cutscene(),
-  "{0} • Fighting it out • Port Golyat • {1}{2}",
+  "{0} • Fighting it out • Port Golyat • {1} • Campaign length: {3} {4}{2}",
   rich_presence_lookup("Chapter",  chapter(),  chapter_name, "Chapter ??"),
   rich_presence_value("Time", in_game_time(), "FRAMES"),
-  rich_presence_lookup("HardMode", hard_mode(), hard_mode, "")
+  rich_presence_lookup("HardMode", hard_mode(), hard_mode, ""),
+  rich_presence_value("CampaignLength", days_elapsed()),
+  rich_presence_lookup("Days", days_elapsed(), days_singular, "days")
 )
 
 rich_presence_conditional_display(
@@ -5619,38 +5848,46 @@ rich_presence_conditional_display(
 
 rich_presence_conditional_display(
   is_battle() && is_potd(),
-  "{0} • Fighting it out • Palace of the Dead - Floor {1} • {2}{3}",
+  "{0} • Fighting it out • Palace of the Dead - Floor {1} • {2} • Campaign length: {4} {5}{3}",
   rich_presence_lookup("Chapter",  chapter(),  chapter_name, "Chapter ??"),
   rich_presence_value("Floor", potd_floor()),
   rich_presence_value("Time", in_game_time(), "FRAMES"),
-  rich_presence_lookup("HardMode", hard_mode(), hard_mode, "")
+  rich_presence_lookup("HardMode", hard_mode(), hard_mode, ""),
+  rich_presence_value("CampaignLength", days_elapsed()),
+  rich_presence_lookup("Days", days_elapsed(), days_singular, "days")
 )
 
 rich_presence_conditional_display(
   is_battle() && is_gardens(),
-  "{0} • Fighting it out • Hanging Gardens - {1} • {2}{3}",
+  "{0} • Fighting it out • Hanging Gardens - {1} • {2} • Campaign length: {4} {5}{3}",
   rich_presence_lookup("Chapter", chapter(), chapter_name,    "Chapter ??"),
   rich_presence_lookup("Gardens", map_id(),   hanging_gardens, "Hanging Gardens"),
   rich_presence_value("Time", in_game_time(), "FRAMES"),
-  rich_presence_lookup("HardMode", hard_mode(), hard_mode, "")
+  rich_presence_lookup("HardMode", hard_mode(), hard_mode, ""),
+  rich_presence_value("CampaignLength", days_elapsed()),
+  rich_presence_lookup("Days", days_elapsed(), days_singular, "days")
 )
 
 rich_presence_conditional_display(
   is_battle(),
-  "{0} • Fighting it out • {1} • {2}{3}",
+  "{0} • Fighting it out • {1} • {2} • Campaign length: {4} {5}{3}",
   rich_presence_lookup("Chapter",  chapter(),  chapter_name, "Chapter ??"),
   rich_presence_lookup("Location", location(), map_location, "Unknown Location"),
   rich_presence_value("Time", in_game_time(), "FRAMES"),
-  rich_presence_lookup("HardMode", hard_mode(), hard_mode, "")
+  rich_presence_lookup("HardMode", hard_mode(), hard_mode, ""),
+  rich_presence_value("CampaignLength", days_elapsed()),
+  rich_presence_lookup("Days", days_elapsed(), days_singular, "days")
 )
 
 rich_presence_conditional_display(
   is_training_battle(),
-  "{0} • Training battle • {1} • {2}{3}",
+  "{0} • Training battle • {1} • {2} • Campaign length: {4} {5}{3}",
   rich_presence_lookup("Chapter",  chapter(),  chapter_name, "Chapter ??"),
   rich_presence_lookup("Location", location(), map_location, "Unknown Location"),
   rich_presence_value("Time", in_game_time(), "FRAMES"),
-  rich_presence_lookup("HardMode", hard_mode(), hard_mode, "")
+  rich_presence_lookup("HardMode", hard_mode(), hard_mode, ""),
+  rich_presence_value("CampaignLength", days_elapsed()),
+  rich_presence_lookup("Days", days_elapsed(), days_singular, "days")
 )
 
 rich_presence_display("Peeling the Tactics Onion")
