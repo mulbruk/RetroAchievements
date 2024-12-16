@@ -1609,7 +1609,7 @@ achievement(
 )
 
 achievement(
-  title = "A Detour around the Duke's Lines", id = 435606,
+  title = "A Detour Around the Duke's Lines", id = 435606,
   description = "Defeat Farrel at Krysaro Town during chapter 2 on the chaos route",
   type = "progression", points = 5,
   trigger = event_flag_trigger(chapter_stable("C2C"), c2c_krysaro_battle())
@@ -1786,7 +1786,7 @@ achievement(
 )
 
 achievement(
-  title = "Profaning All That is Sacred", id = 435576,
+  title = "Profaning All That Is Sacred", id = 435576,
   description = "Defeat the undead throng at Hagia Banhamuba during chapter 3 on the neutral route",
   type="progression", points = 5,
   trigger = event_flag_trigger(chapter_stable("C3N"), c3n_banhamuba_battle())
@@ -1939,7 +1939,7 @@ achievement(
 )
 
 achievement(
-  title = "Hotfooting It through Hedon", id = 435587,
+  title = "Hotfooting It Through Hedon", id = 435587,
   description = "Defeat LeRozza the Gray at Mount Hedon during chapter 4",
   type="progression", points = 5,
   trigger = event_flag_trigger(chapter_stable("C4"), c4_hedon_battle())
@@ -2270,7 +2270,7 @@ function hard_mode_siege(
 )
 
 achievement(
-  title = "Fight it Out!", id = 437051,
+  title = "Fight It Out!", id = 437051,
   description = "In a single attempt on hard mode, complete a pair of fateful battles at Balmamusa during chapter 1",
   points = 10,
   trigger = hard_mode_siege(
@@ -4298,7 +4298,7 @@ achievement(
 )
 
 achievement(
-  title = "Howling into the Wind", id = 437049,
+  title = "Howling Into the Wind", id = 437049,
   description = "Defeat the guardians of Hahnela Temple using only weapons, spells, skills, and items of the wind element. Resuming from a mid-battle save is prohibited",
   type = "missable", points = 10,
   trigger = (
@@ -5177,7 +5177,7 @@ achievement(
 )
 
 achievement(
-  title = "Talk it Out", id = 429317,
+  title = "Talk It Out", id = 429317,
   description = "Use the Persuade skill to convince an enemy unit to join you",
   points = 5,
   trigger = (
