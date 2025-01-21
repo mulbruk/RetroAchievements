@@ -1,0 +1,49 @@
+//Format
+
+Format:Digit
+FormatType=VALUE
+
+//Lookup
+
+Lookup:Course
+0x00=Sunny Beach
+0x01=Green Field
+0x02=Park Town
+0x03=Outer Pass
+0x04=Above the City
+0x05=Bayside Line
+0x06=Airport Oval
+*=Unknown Course
+
+Lookup:Rank
+0x00=1st
+0x01=2nd
+0x02=3rd
+0x03=4th
+0x04=5th
+0x05=6th
+0x06=7th
+0x07=8th
+0x08=9th
+0x09=10th
+0x0A=11th
+0x0B=12th
+0x0C=13th
+0x0D=14th
+
+Lookup:Class
+0x00=Standard
+0x01=Extra
+0x02=Duel
+*=Unknown
+
+Lookup:Difficulty
+0x00=Easy Difficulty
+0x01=Normal Difficulty
+0x02=Hard Difficulty
+
+//Display
+
+Display:
+?0xh1dbfcf8=7?Not Racing
+@Difficulty(0xh1e2d17d) • @Course(0xh1dbfcf8) • Lap @Digit(0xh1db2cb4) • @Rank(0xh1db3714) Place • @Class(0xh1e2d14c) Class
