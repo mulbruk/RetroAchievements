@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# Environment files
+.env
+
+# Build directories
+build/
+
+# Typescript incremental build cache
+*.tsbuildinfo
+
+# Dependency directories
+node_modules/
