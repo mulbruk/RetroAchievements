@@ -1,0 +1,21 @@
+{
+  "type": "module",
+  "scripts": {
+    "build": "npx tsc",
+    "diff": "npx tsc && npx cruncheevos diff",
+    "diff-save": "npx tsc && npx cruncheevos diff-save",
+    "rich": "npx tsc && npx cruncheevos rich-save",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.7",
+    "typescript": "^5.6.3",
+    "vite-tsconfig-paths": "^5.0.1"
+  },
+  "dependencies": {
+    "@cruncheevos/cli": "^0.0.7",
+    "@cruncheevos/core": "^0.0.7",
+    "ts-pattern": "^5.5.0",
+    "vitest": "^2.1.3"
+  }
+}
