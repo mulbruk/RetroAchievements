@@ -13,8 +13,8 @@
     "vite-tsconfig-paths": "^5.0.1"
   },
   "dependencies": {
-    "@cruncheevos/cli": "^0.0.7",
-    "@cruncheevos/core": "^0.0.7",
+    "@cruncheevos/cli": "^0.0.8",
+    "@cruncheevos/core": "^0.0.8",
     "ts-pattern": "^5.5.0",
     "vitest": "^2.1.3"
   }

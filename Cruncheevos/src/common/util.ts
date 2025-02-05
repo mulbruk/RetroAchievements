@@ -9,3 +9,13 @@ export function commaSeparatedList(ls: string[]): string {
 export function identity<T>(x: T): T {
   return x;
 }
+
+export function timeToFramesNTSC(
+  opts: Partial<{hours: number, minutes: number, seconds: number}>
+): number {
+  const hh = opts.hours ?? 0;
+  const mm = opts.minutes ?? 0;
+  const ss = opts.seconds ?? 0;
+  
+  return ((hh * 60 + mm) * 60 + ss) * 60;
+}
