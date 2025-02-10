@@ -1504,14 +1504,14 @@ achievement(
 achievement(
   title = "If Someone Must Bloody Their Hands...", id = 425193,
   description = "Accept orders at Balmamusa, for the good of the Walister cause",
-  type = "progression", points = 10,
+  points = 10,
   trigger = event_flag_trigger(chapter_stable("C1"), c1_law_choice())
 )
 
 achievement(
   title = "What Virtue Lies in This Madness?", id = 425194,
   description = "Refuse orders at Balmamusa and become an outlaw",
-  type = "progression", points = 10,
+  points = 10,
   trigger = event_flag_trigger(chapter_stable("C1"), c1_chaos_choice())
 )
 
@@ -1519,63 +1519,63 @@ achievement(
 achievement(
   title = "True Freedom Isn't Granted from Above, It Is Won from Below", id = 435552,
   description = "Defeat all enemy forces at Balmamusa during chapter 2 on the law route",
-  type = "progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C2L"), c2l_balmamusa_battle())
 )
 
 achievement(
   title = "Only Blood Can Pay the Price of the Slain", id = 435553,
   description = "Defeat Garba of the Blue Flame at Xeod Moors during chapter 2 on the law route",
-  type = "progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C2L"), c2l_xeod_battle())
 )
 
 achievement(
   title = "No Quarter to Ogres Who Slay Their Own", id = 435554,
   description = "Defeat Nadia of the Requiem at Port Asyton during chapter 2 on the law route",
-  type = "progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C2L"), c2l_asyton_battle())
 )
 
 achievement(
   title = "Better the Rams Rise to Lead the Flock Than Such Shepherds", id = 425196,
   description = "Defeat Arycelle at Port Asyton during chapter 2 on the law route",
-  type = "progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C2L"), c2l_arycelle_battle())
 )
 
 achievement(
   title = "A Dry Grave's No End for a Pirate", id = 435593,
   description = "Defeat Darza the Pirate at Qadriga Fortress during chapter 2 on the law route",
-  type = "progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C2L"), c2l_qadriga_battle())
 )
 
 achievement(
   title = "A War Fought in the Name of Power, Not People", id = 435555,
   description = "Defeat Wynoa of the Wilds at Tynemouth Hill during chapter 2 on the law route",
-  type = "progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C2L"), c2l_tynemouth_battle())
 )
 
 achievement(
   title = "Was It All to Slake a Thirst for Power?", id = 435556,
   description = "Defeat Gousin of Prayer at Golborza Plain during chapter 2 on the law route",
-  type = "progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C2L"), c2l_golborza_battle())
 )
 
 achievement(
   title = "Is Revolution without Principles Meaningless?", id = 425197,
   description = "Defeat Vyce and Arycelle at Rhime during chapter 2 on the law route",
-  type = "progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C2L"), c2l_rhime_battle())
 )
 
 achievement(
   title = "What Becomes of Those Who've Outlived Their Usefulness?", id = 425198,
   description = "Participate in Sir Leonar's plot against Duke Ronwey during chapter 2 on the law route",
-  type = "progression", points = 10,
+  points = 10,
   trigger = event_flag_trigger(chapter_transition("C2L", "C3L"), c2l_leonar_battle())
 )
 
@@ -1583,42 +1583,42 @@ achievement(
 achievement(
   title = "Justice and War Seldom Keep Company", id = 435557,
   description = "Defeat Arycelle at Port Asyton during chapter 2 on the chaos route",
-  type = "progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C2C"), c2c_asyton_battle())
 )
 
 achievement(
   title = "In the Heat of Battle, All Are Criminal and All Are Innocent", id = 435558,
   description = "Defeat Xapan at Xeod Moors during chapter 2 on the chaos route",
-  type = "progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C2C"), c2c_xeod_battle())
 )
 
 achievement(
   title = "It Is the People Who Suffer in Any Struggle, However Noble", id = 435559,
   description = "Defeat Genzo the Wailing at Lake Bordu during chapter 2 on the chaos route",
-  type = "progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C2C"), c2c_bordu_battle())
 )
 
 achievement(
   title = "It Is a Fact of Life and War That Men Use Others", id = 425199,
   description = "Defeat Vyce at Tynemouth Hill during chapter 2 on the chaos route",
-  type = "progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C2C"), c2c_vyce_battle())
 )
 
 achievement(
   title = "A Detour Around the Duke's Lines", id = 435606,
   description = "Defeat Farrel at Krysaro Town during chapter 2 on the chaos route",
-  type = "progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C2C"), c2c_krysaro_battle())
 )
 
 achievement(
   title = "Breaking What Sea and Storm Have Made Strong", id = 435560,
   description = "Defeat Darza the Pirate at Qadriga Fortress during chapter 2 on the chaos route",
-  type = "progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C2C"), c2c_qadriga_battle())
 )
 
@@ -1632,35 +1632,35 @@ achievement(
 achievement(
   title = "Prayers Left Unanswered", id = 435561,
   description = "Defeat Dagon of Woe at Golyat during chapter 2 on the chaos route",
-  type = "progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C2C"), c2c_golyat_battle())
 )
 
 achievement(
   title = "Where There's Peril, There's Reward", id = 435562,
   description = "Defeat Xapan at Rhime during chapter 2 on the chaos route",
-  type = "progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C2C"), c2c_rhime_battle())
 )
 
 achievement(
   title = "If Words Will Not Win Free, Steel Must", id = 435563,
   description = "Defeat Ramidos the Poison Fang at Golborza Plain during chapter 2 on the chaos route",
-  type = "progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C2C"), c2c_golborza_battle())
 )
 
 achievement(
   title = "What's Done Is Done", id = 425201,
   description = "Accept Sir Leonar's offer to rejoin the Walister Resistance",
-  type = "progression", points = 10,
+  points = 10,
   trigger = event_flag_trigger(chapter_transition("C2C", "C3N"), c2c_neutral_choice())
 )
 
 achievement(
   title = "What's Done Cannot Be Undone", id = 425202,
   description = "Reject Sir Leonar's offer to rejoin the Walister Resistance",
-  type = "progression", points = 10,
+  points = 10,
   trigger = event_flag_trigger(chapter_transition("C2C", "C3C"), c2c_chaos_choice())
 )
 
@@ -1668,21 +1668,21 @@ achievement(
 achievement(
   title = "Advancing From Behind the Keep", id = 435564,
   description = "Defeat all hostile wildlife at Madura Drift during chapter 3 on the law route",
-  type="progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C3L"), c3l_madura_battle())
 )
 
 achievement(
   title = "Curse the Gods or Curse Your Sorry Selves", id = 435565,
   description = "Defeat Hektor the Chagrined at Brigantys Castle during chapter 3 on the law route",
-  type="progression", points = 10,
+  points = 10,
   trigger = event_flag_trigger(chapter_stable("C3L"), c3l_brigantys_battle())
 )
 
 achievement(
   title = "Creeping in the Shadows Towards Coritanae", id = 435566,
   description = "Defeat Roberval the Withered at Bahanna Highland during chapter 3 on the law route",
-  type="progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C3L"), c3l_bahanna_battle())
 )
 
@@ -1696,49 +1696,49 @@ achievement(
 achievement(
   title = "Hierophant's End", id = 425204,
   description = "Defeat Gatialo the Ochre at Coritanae Keep and confront Hierophant Balbatos during chapter 3 on the law route",
-  type = "progression", points = 10,
+  points = 10,
   trigger = event_flag_trigger(chapter_stable("C3L"), c3l_coritanae_battle())
 )
 
 achievement(
   title = "Escape from the Swamp", id = 435567,
   description = "Defeat either Brutakos of Purple at Lake Bordu or Muntzer the Horsetail at the Psonji Weald during chapter 3 on the law route",
-  type="progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C3L"), c3l_bordu_or_psonji())
 )
 
 achievement(
   title = "Serving Another Bowl of the Weak Broth of Defeat", id = 435568,
   description = "Defeat Ganpp at Tynemouth Hill during chapter 3 on the law route",
-  type="progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C3L"), c3l_tynemouth_battle())
 )
 
 achievement(
   title = "Extinguishing Galgastan's Embers", id = 425205,
   description = "Defeat Sir Xaebos at Almorica Castle during chapter 3 on the law route",
-  type = "progression", points = 10,
+  points = 10,
   trigger = event_flag_trigger(chapter_stable("C3L"), c3l_xaebos_battle())
 )
 
 achievement(
   title = "Traversing Ways Known Only to Goatherds and Peasants", id = 435569,
   description = "Defeat all hostile wildlife at Mount Weobry during chapter 3 on the law route",
-  type="progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C3L"), c3l_weobry_battle())
 )
 
 achievement(
   title = "Throw Down Your Swords or Die", id = 435570,
   description = "Defeat the Dark Knight Ozma at Rhime during chapter 3 on the law route",
-  type="progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C3L"), c3l_rhime_battle())
 )
 
 achievement(
   title = "A Castle Is Only as Strong as Its Garrison", id = 425206,
   description = "Defeat the Dark Knight Oz at Phidoch Castle during chapter 3 on the law route",
-  type = "progression", points = 10,
+  points = 10,
   trigger = event_flag_trigger(chapter_transition("C3L", "C4"), c3l_oz_battle())
 )
 
@@ -1746,21 +1746,21 @@ achievement(
 achievement(
   title = "Those Who Truly Seek Death", id = 435571,
   description = "Defeat Hektor the Chagrined at Almorica Castle during chapter 3 on the neutral route",
-  type="progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C3N"), c3n_almorica_battle())
 )
 
 achievement(
   title = "A Dark Day for a Dark Knight", id = 435572,
   description = "Defeat the Dark Knight Oz at Boed Fortress during chapter 3 on the neutral route",
-  type="progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C3N"), c3n_boed_battle())
 )
 
 achievement(
   title = "Feeding on the Rich Stew of Vengeance", id = 435573,
   description = "Defeat Ganpp at Tynemouth Hill during chapter 3 on the neutral route",
-  type="progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C3N"), c3n_tynemouth_battle())
 )
 
@@ -1774,28 +1774,28 @@ achievement(
 achievement(
   title = "Ones Pallid of Flesh", id = 435574,
   description = "Defeat the undead throng at Port Asyton during chapter 3 on the neutral route",
-  type="progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C3N"), c3n_asyton_battle())
 )
 
 achievement(
   title = "Defiling the Very Substance of Life", id = 435575,
   description = "Defeat the undead throng at Mount Hedon during chapter 3 on the neutral route",
-  type="progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C3N"), c3n_hedon_battle())
 )
 
 achievement(
   title = "Profaning All That Is Sacred", id = 435576,
   description = "Defeat the undead throng at Hagia Banhamuba during chapter 3 on the neutral route",
-  type="progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C3N"), c3n_banhamuba_battle())
 )
 
 achievement(
   title = "Blasphemous Experiment", id = 425208,
   description = "Defeat Nybeth Obdilord at Ndamsa Fortress and release Gildas from his torment during chapter 3 on the neutral route",
-  type = "progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C3N"), c3n_nybeth_battle())
 )
 
@@ -1809,28 +1809,28 @@ achievement(
 achievement(
   title = "How Men of Honour Meet Death", id = 425210,
   description = "Defeat Sir Xaebos at Coritanae Keep during chapter 3 on the neutral route",
-  type = "progression", points = 10,
+  points = 10,
   trigger = event_flag_trigger(chapter_stable("C3N"), c3n_xaebos_battle())
 )
 
 achievement(
   title = "Taking Rhime Unawares", id = 435577,
   description = "Defeat all hostile wildlife at Mount Weobry during chapter 3 on the neutral route",
-  type="progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C3N"), c3n_weobry_battle())
 )
 
 achievement(
   title = "Too Many Have Died to End This with Half Measures", id = 435578,
   description = "Defeat all enemy forces at Rhime during chapter 3 on the neutral route",
-  type="progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C3N"), c3n_rhime_battle())
 )
 
 achievement(
   title = "For What Have We Bled?", id = 425211,
   description = "Defeat the Dark Knight Ozma at Phidoch Castle during chapter 3 on the neutral route",
-  type = "progression", points = 10,
+  points = 10,
   trigger = event_flag_trigger(chapter_transition("C3N", "C4"), c3n_ozma_battle())
 )
 
@@ -1838,77 +1838,77 @@ achievement(
 achievement(
   title = "Sending Gannon to Ground a Corpse", id = 435579,
   description = "Defeat Gannon the Violet at Port Asyton during chapter 3 on the chaos route",
-  type="progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C3C"), c3c_asyton_battle())
 )
 
 achievement(
   title = "Better to Die at a Traitor's Hands than Die a Traitor", id = 435580,
   description = "Defeat Felnatore the Reverend at Xeod Moors during chapter 3 on the chaos route",
-  type="progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C3C"), c3c_xeod_battle())
 )
 
 achievement(
   title = "There Is Blood Enough on All Our Hands", id = 435581,
   description = "Defeat Sir Xaebos at Coritanae Keep during chapter 3 on the chaos route",
-  type="progression", points = 10,
+  points = 10,
   trigger = event_flag_trigger(chapter_stable("C3C"), c3c_coritanae_battle_1())
 )
 
 achievement(
   title = "A Foul Place for Battle", id = 435582,
   description = "Defeat all enemy forces at Bahanna Highland during chapter 3 on the chaos route",
-  type="progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C3C"), c3c_bahanna_battle_1())
 )
 
 achievement(
   title = "Why Dirty One's Hands, When a Mob Will Do the Knifework for You?", id = 425212,
   description = "Defeat Sir Xaebos at Brigantys Castle during chapter 3 on the chaos route",
-  type = "progression", points = 10,
+  points = 10,
   trigger = event_flag_trigger(chapter_stable("C3C"), c3c_xaebos_battle())
 )
 
 achievement(
   title = "For Every Step Forward Sliding Back Two", id = 435583,
   description = "Defeat Modiliani the Angry at Bahanna Highland during chapter 3 on the chaos route",
-  type="progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C3C"), c3c_bahanna_battle_2())
 )
 
 achievement(
   title = "Dwelling in the Dark and Drinking Deep of Blood", id = 425213,
   description = "Defeat Sir Leonar at Coritanae Keep during chapter 3 on the chaos route",
-  type = "progression", points = 10,
+  points = 10,
   trigger = event_flag_trigger(chapter_stable("C3C"), c3c_leonar_battle())
 )
 
 achievement(
   title = "Serving up the Bitter Stew of Failure", id = 435584,
   description = "Defeat Ganpp at Mount Weobry during chapter 3 on the chaos route",
-  type="progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C3C"), c3c_weobry_battle())
 )
 
 achievement(
   title = "Who Holds the Power Now?", id = 435585,
   description = "Defeat Hiram the Red at Rhime during chapter 3 on the chaos route",
-  type = "progression", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C3C"), c3c_rhime_battle())
 )
 
 achievement(
   title = "Harrying the Dark Knights", id = 435586,
   description = "Defeat the Dark Knight Oz at Boed Fortress during chapter 3 on the chaos route",
-  type = "", points = 5,
+  points = 5,
   trigger = event_flag_trigger(chapter_stable("C3C"), c3c_boed_battle())
 )
 
 achievement(
   title = "The Fall of House Glacius", id = 425214,
   description = "Defeat the Dark Knights Oz and Ozma at Phidoch Castle during chapter 3 on the chaos route",
-  type = "progression", points = 10,
+  points = 10,
   trigger = event_flag_trigger(chapter_stable("C3C"), c3c_oz_ozma_battle())
 )
 
@@ -1962,7 +1962,7 @@ achievement(
 achievement(
   title = "The Pirates of Qadriga Fortress", id = 445885,
   description = "Investigate reports of pirate activity at Qadriga Fortress during chapter 4",
-  type = "", points = 3,
+  type = "missable", points = 3,
   trigger = event_flag_trigger(chapter_stable("C4"), c4_qadriga_pirates())
 )
 
@@ -2103,7 +2103,7 @@ achievement(
 achievement(
   title = "The Great Valerian Fortresses", id = 435605,
   description = "Open the way to the elemental temples by defeating the outlaw groups occupying Boed Fortress, Fortress Geyld, Gecho Fortress, and Ndamsa Fortress",
-  points = 10,
+  type = "missable", points = 10,
   trigger = (
     load_protection() &&
     chapter() == ChapterID["C4"] &&
@@ -2122,7 +2122,7 @@ achievement(
 achievement(
   title = "Xoshonell's Strength", id = 425235,
   description = "Defeat the guardians of Xoshonell Temple and acquire Supernova, the fire apocrypha",
-  points = 5,
+  type = "missable", points = 5,
   trigger = (
     once(c4_xoshonell_temple()) &&
     once(spell_added_to_inventory("Supernova")) && 
@@ -2137,7 +2137,7 @@ achievement(
 achievement(
   title = "Hahnela's Fury", id = 425249,
   description = "Defeat the guardians of Hahnela Temple and acquire Air Cry, the wind apocrypha",
-  points = 5,
+  type = "missable", points = 5,
   trigger = (
     once(c4_hahnela_temple()) &&
     once(spell_added_to_inventory("AirCry")) && 
@@ -2152,7 +2152,7 @@ achievement(
 achievement(
   title = "Vaasa's Might", id = 425250,
   description = "Defeat the guardians of Vaasa Temple and acquire Earthquake, the earth apocrypha",
-  points = 5,
+  type = "missable", points = 5,
   trigger = (
     once(c4_vaasa_temple()) &&
     once(spell_added_to_inventory("Earthquake")) && 
@@ -2272,7 +2272,7 @@ function hard_mode_siege(
 achievement(
   title = "Fight It Out!", id = 437051,
   description = "In a single attempt on hard mode, complete a pair of fateful battles at Balmamusa during chapter 1",
-  points = 10,
+  type = "missable", points = 10,
   trigger = hard_mode_siege(
     [is_encounter("Balmamusa C1") && is_map("Balmamusa C1")],
     0x0C,
@@ -2287,7 +2287,7 @@ achievement(
 achievement(
   title = "A Better Tomorrow",
   description = "In a single attempt on hard mode, complete all battles in the assault on Almorica Castle during chapter 2 on the chaos route",
-  points = 10,
+  type = "missable", points = 10,
   trigger = hard_mode_siege(
     [is_encounter("Almorica Gates 2C") && is_map("Almorica Gates")],
     0x18,
@@ -2305,7 +2305,7 @@ achievement(
 achievement(
   title = "Revolt",
   description = "In a single attempt on hard mode, complete all battles in the assault on Almorica Castle during chapter 2 on the law route",
-  points = 10,
+  type = "missable", points = 10,
   trigger = hard_mode_siege(
     [is_encounter("Almorica Gates 2L") && is_map("Almorica Gates")],
     0x18,
@@ -2318,7 +2318,7 @@ achievement(
 achievement(
   title = "Impregnable Defense",
   description = "In a single attempt on hard mode, complete all battles in the assault on Phidoch Castle during chapter 3 on the neutral route",
-  points = 10,
+  type = "missable", points = 10,
   trigger = hard_mode_siege(
     [
       is_encounter("Phidoch South") && is_map("Phidoch South"),
@@ -2334,7 +2334,7 @@ achievement(
 achievement(
   title = "Chivalry and Savagery",
   description = "In a single attempt on hard mode, complete all battles in the assault on Phidoch Castle during chapter 3 on the chaos route",
-  points = 10,
+  type = "missable", points = 10,
   trigger = hard_mode_siege(
     [
       is_encounter("Phidoch South") && is_map("Phidoch South"),
@@ -2350,7 +2350,7 @@ achievement(
 achievement(
   title = "Vendetta!",
   description = "In a single attempt on hard mode, complete all battles in the assault on Phidoch Castle during chapter 3 on the law route",
-  points = 10,
+  type = "missable", points = 10,
   trigger = hard_mode_siege(
     [
       is_encounter("Phidoch South") && is_map("Phidoch South"),
@@ -2366,7 +2366,7 @@ achievement(
 achievement(
   title = "A Clash of Giants",
   description = "In a single attempt on hard mode, complete all battles in the assault on Barnicia Castle during chapter 4",
-  points = 10,
+  type = "missable", points = 10,
   trigger = hard_mode_siege(
     [is_encounter("Barnicia Gates") && is_map("Barnicia Gates")],
     0x1B,
@@ -2379,7 +2379,7 @@ achievement(
 achievement(
   title = "Restriction on Power",
   description = "In a single attempt on hard mode, complete all battles in the assault on Heim during chapter 4",
-  points = 10,
+  type = "missable", points = 10,
   trigger = hard_mode_siege(
     [
       is_encounter("Heim Postern Gate") && is_map("Heim Postern Gate"),
@@ -2451,7 +2451,7 @@ function hard_mode_potd(
 achievement(
   title = "Deathrattle",
   description = "In a single attempt on hard mode, clear floors 1-25 of the Palace of the Dead and defeat Vepahl",
-  points = 10,
+  type = "missable", points = 10,
   trigger = hard_mode_potd(
     1,
     25,
@@ -2463,7 +2463,7 @@ achievement(
 achievement(
   title = "Fog of Phantom",
   description = "In a single attempt on hard mode, clear floors 26-50 of the Palace of the Dead and defeat Belzebuth",
-  points = 10,
+  type = "missable", points = 10,
   trigger = hard_mode_potd(
     26,
     50,
@@ -2475,7 +2475,7 @@ achievement(
 achievement(
   title = "Billow of the Dark",
   description = "In a single attempt on hard mode, clear floors 50-100 of the Palace of the Dead and defeat Nybeth",
-  points = 25,
+  type = "missable", points = 25,
   trigger = hard_mode_potd(
     51,
     100,
@@ -5125,7 +5125,7 @@ achievement(
 achievement(
   title = "A Kind of Magic", id = 426284,
   description = "Promote one or more of the Phoraena sisters to the Shaman class",
-  points = 3,
+  type = "missable", points = 3,
   trigger = (
     load_protection() &&
     chapter_stable("C4") &&
@@ -5285,7 +5285,7 @@ achievement(
 achievement(
   title = "Staving off Death Another Day", id = 426233,
   description = "Acquire the Resurrect spell",
-  points = 5,
+  type = "missable", points = 5,
   trigger = (
     load_protection() &&
     chapter() == prev(chapter()) &&
