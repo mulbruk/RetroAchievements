@@ -252,7 +252,7 @@ export function makeAchievements(set: AchievementSet) {
   set.addAchievement({
     title: `Schmovin' in 2-3`,
     id: 497130,
-    points: 10,
+    points: 5,
     description: `Complete stage 2-3 with at least 300 seconds remaining on the clock`,
     conditions: {
       core: define(
@@ -382,7 +382,7 @@ export function makeAchievements(set: AchievementSet) {
   set.addAchievement({
     title: `Schmovin' in 4-2`,
     id: 497132,
-    points: 5,
+    points: 10,
     description: `Complete stage 4-2 without going below 270 seconds remaining on the clock`,
     conditions: {
       core: define(
@@ -502,7 +502,7 @@ export function makeAchievements(set: AchievementSet) {
     title: `Expeditious Adventurer`,
     id: 497127,
     points: 25,
-    description: `Complete the game in under 24 minutes`,
+    description: `Complete the game in under 25 minutes`,
     conditions: {
       core: define(
         andNext(
@@ -517,7 +517,7 @@ export function makeAchievements(set: AchievementSet) {
           eq(ADDR.level, 0x000),
           eq(prev(ADDR.game_state), GameState.CharacterSelect),
           once(eq(ADDR.game_state, GameState.StageStart)),
-          cond('ResetIf', 1, '=', 1, timeToFramesNTSC({minutes: 24}))
+          cond('ResetIf', 1, '=', 1, timeToFramesNTSC({minutes: 25}))
         ),
         resetIf(
           eq(ADDR.game_state, GameState.BootLogos),
