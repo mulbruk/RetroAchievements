@@ -6,6 +6,14 @@ import { match } from "ts-pattern";
 
 // ---------------------------------------------------------------------------------------------------
 
+export function recall(): Condition.Value {
+  return {
+    type: 'Recall',
+    size: '',
+    value: 0,
+  }
+}
+
 export function cond(
   flag:    Condition.Flag,
   lvalue:  Condition.Value | number,
