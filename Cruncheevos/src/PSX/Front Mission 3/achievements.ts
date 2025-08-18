@@ -4,7 +4,7 @@ import {
   trigger
 } from "@cruncheevos/core";
 
-import { cond, prev, not, eq, neq, lt, gte, gt, recall } from "../../common/comparison.js";
+import { cond, prev, not, eq, neq, lt, gte, gt, recall, lte } from "../../common/comparison.js";
 import { commaSeparatedList, range } from "../../common/util.js";
 import { ADDR, battleSkills, PILOT } from "./data.js";
 import { bit0, bit1, byte, dword, dword_be, word } from "../../common/value.js";
@@ -48,15 +48,10 @@ function is_usn_route() {
 
 function timedChallenge(sceneID: number, progressionState: number, turnCount: number) {
   return define(
-    once(
-      andNext(
-        eq(ADDR.overlay1, 0x66666569),
-        eq(ADDR.progression_state, progressionState),
-        eq(ADDR.scene_id, sceneID),
-        gt(prev(ADDR.battle_state), 0x00),
-        eq(ADDR.battle_state, 0x00),
-      )
-    ),
+    eq(ADDR.progression_state, progressionState),
+    eq(ADDR.scene_id, sceneID),
+    lte(ADDR.turn_number, turnCount),
+    once(eq(ADDR.battle_state, 0x00)),
     trigger(
       andNext(
         eq(prev(ADDR.overlay1), 0x66666569),
@@ -64,18 +59,12 @@ function timedChallenge(sceneID: number, progressionState: number, turnCount: nu
       )
     ),
     resetIf(
-      gt(ADDR.turn_number, turnCount),
-    ),
-    resetIf(
       andNext(
-        neq(ADDR.overlay1, 0x66666569),
-        neq(ADDR.overlay1, 0x7365727a),
-      ),
-      neq(ADDR.progression_state, progressionState),
-      neq(ADDR.scene_id, sceneID),
-      eq(ADDR.battle_state, 0xc000),
-    )
-  );
+        eq(ADDR.overlay1, 0x66666569),
+        eq(ADDR.overlay1, 0x7365727a),
+      )
+    ),
+  )
 }
 
 function wanzerCapture(wanzerName: string) {
@@ -100,12 +89,12 @@ function wanzerCapture(wanzerName: string) {
   return {
     core: define(
       // Priming
-      once(
-        andNext(
-          eq(prev(ADDR.overlay1), 0x746e6573),
-          eq(ADDR.overlay1, 0x66666569),
-        )
-      ),
+      once(eq(ADDR.battle_state, 0x00)),
+
+      neq(ADDR.scene_id, 0x01),
+      neq(ADDR.scene_id, 0x02),
+      neq(ADDR.scene_id, 0x76),
+
       // Null checks
       trigger(
         orNext(
@@ -305,7 +294,7 @@ function makeAchievements(set: AchievementSet) {
       id: 535015,
     },
     {
-      stageID: 0x33, progressionState: 0x32,
+      stageID: 0x33, progressionState: 0xe8,
       title: `Trouble in Taipei`,
       description: `Escape through the streets of Taipei on the USN route`,
       points: 5,
@@ -917,15 +906,8 @@ function makeAchievements(set: AchievementSet) {
     conditions: {
       core: define(
        // Priming
-        once(
-          andNext(
-            eq(ADDR.overlay1, 0x66666569),
-            eq(ADDR.progression_state, 0x0f),
-            eq(ADDR.scene_id, 0x14),
-            eq(prev(ADDR.battle_state), 0x01),
-            eq(ADDR.battle_state, 0x00),
-          )
-        ),
+        once(eq(ADDR.battle_state, 0x00)),
+
         // Null checks
         trigger(
           orNext(
@@ -1008,28 +990,15 @@ function makeAchievements(set: AchievementSet) {
     conditions: {
       core: define(
         // Priming
-        once(
-          andNext(
-            eq(ADDR.overlay1, 0x66666569),
-            eq(ADDR.progression_state, 0x21),
-            eq(ADDR.scene_id, 0x24),
-            eq(prev(ADDR.battle_state), 0x01),
-            eq(ADDR.battle_state, 0x00),
-          )
-        ),
+        eq(ADDR.overlay1, 0x66666569),
+        eq(ADDR.progression_state, 0x21),
+        eq(ADDR.scene_id, 0x24),
+        eq(ADDR.battle_state, 0x00),
+        lte(ADDR.turn_number, 6),
 
         // Null checks
         trigger( neq(ADDR.in_battle_data_ptr1, 0x00000000) ),
         trigger( neq(ADDR.in_battle_data_ptr2, 0x00000000) ),
-
-        // Resets
-        resetIf( gt(ADDR.turn_number, 6) ),
-        resetIf(
-          neq(ADDR.overlay1, 0x66666569),
-          neq(ADDR.progression_state, 0x21),
-          neq(ADDR.scene_id, 0x24),
-          eq(ADDR.battle_state, 0x0c),
-        ),
       ),
       ...range(0, 13).reduce((acc, n) => ({
         ...acc,
@@ -1037,9 +1006,9 @@ function makeAchievements(set: AchievementSet) {
           cond('Remember', ADDR.in_battle_data_ptr2,     '+', 0x137c),
           cond('Remember', recall(),                     '&', 0xFFFFFF),
           cond('AddAddress', recall()),
-          cond('Trigger',    dword_be(n * 620 + 0x09),   '=', 0x4c616979),
+          cond('',           dword_be(n * 620 + 0x09),   '=', 0x4c616979),
           cond('AddAddress', recall()),
-          cond('Trigger',    prev(word(n * 620 + 0x86)), '>', 0x00),
+          cond('',           prev(word(n * 620 + 0x86)), '>', 0x00),
           cond('AddAddress', recall()),
           cond('Trigger',    word(n * 620 + 0x86),       '=', 0x00),
         )
@@ -1054,20 +1023,6 @@ function makeAchievements(set: AchievementSet) {
     points: 5,
     conditions: {
       core: define(
-        // Priming
-        once(
-          andNext(
-            orNext(
-              eq(ADDR.scene_id, 0x46),
-              eq(ADDR.scene_id, 0x47),
-            ),
-            eq(ADDR.overlay1, 0x66666569),
-            eq(ADDR.progression_state, 0x43),
-            eq(prev(ADDR.battle_state), 0x01),
-            eq(ADDR.battle_state, 0x00),
-          )
-        ),
-
         // Complete mission
         trigger(
           andNext(
@@ -1100,6 +1055,7 @@ function makeAchievements(set: AchievementSet) {
             neq(ADDR.overlay1, 0x66666569),
             neq(ADDR.overlay1, 0x7365727a),
           ),
+          eq(prev(ADDR.overlay1), 0x7365727a),
           neq(ADDR.progression_state, 0x43),
           andNext(
             neq(ADDR.scene_id, 0x46),
@@ -1107,6 +1063,24 @@ function makeAchievements(set: AchievementSet) {
           ),
           eq(ADDR.battle_state, 0xc000),
         ),
+      ),
+      alt1: define(
+        once(
+          andNext(
+            eq(ADDR.scene_id, 0x46),
+            gt(ADDR.li_pilot_hp, 0),
+            eq(ADDR.battle_state, 0x00),
+          )
+        )
+      ),
+      alt2: define(
+        once(
+          andNext(
+            eq(ADDR.scene_id, 0x47),
+            gt(ADDR.jose_pilot_hp, 0),
+            eq(ADDR.battle_state, 0x00),
+          )
+        )
       )
     }
   });
@@ -1155,7 +1129,7 @@ function makeAchievements(set: AchievementSet) {
           cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
           cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
           cond('AndNext',    byte(0x00),               '!=', 0x00),
-          // Check vehicle `n` is truck
+          // Check vehicle `n` is helicopter
           cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
           cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
           cond('AndNext',    dword_be(0x09),           '=',  0x5368616E),
@@ -1459,27 +1433,15 @@ function makeAchievements(set: AchievementSet) {
     conditions: {
       core: define(
         // Priming
-        once(
-          andNext(
-            eq(ADDR.overlay1, 0x66666569),
-            eq(ADDR.progression_state, 0xab),
-            eq(ADDR.scene_id, 0xe6),
-            eq(prev(ADDR.battle_state), 0x01),
-            eq(ADDR.battle_state, 0x00),
-          )
-        ),
+        eq(ADDR.overlay1, 0x66666569),
+        eq(ADDR.progression_state, 0xab),
+        eq(ADDR.scene_id, 0xe6),
+        eq(ADDR.battle_state, 0x00),
+        gt(ADDR.ryogo_pilot_hp, 0),
 
         // Null checks
         trigger( neq(ADDR.in_battle_data_ptr1, 0x00000000) ),
         trigger( neq(ADDR.in_battle_data_ptr2, 0x00000000) ),
-
-        // Resets
-        resetIf(
-          neq(ADDR.overlay1, 0x66666569),
-          neq(ADDR.progression_state, 0xab),
-          neq(ADDR.scene_id, 0xe6),
-          neq(ADDR.battle_state, 0x00),
-        ),
       ),
       ...range(0, 34).reduce((acc, n) => ({
         ...acc,

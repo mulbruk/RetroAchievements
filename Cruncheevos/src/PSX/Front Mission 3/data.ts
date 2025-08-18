@@ -29,8 +29,9 @@ export const ADDR = {
   turn_number:  byte(0x124a8d),
   battle_phase: byte(0x1249ce),
 
-  jose_pilot_hp: word(0x118c3a),
-  li_pilot_hp:   word(0x118dae),
+  ryogo_pilot_hp: word(0x1187de),
+  jose_pilot_hp:  word(0x118c3a),
+  li_pilot_hp:    word(0x118dae),
 
   // USN pilot battle skills ---
   emma_battle_skills:   (n: number) => byte(0x1186b4 + n),
