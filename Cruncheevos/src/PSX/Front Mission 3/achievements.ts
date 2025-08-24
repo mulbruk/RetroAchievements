@@ -118,16 +118,19 @@ function wanzerCapture(wanzerName: string) {
           neq(ADDR.overlay1, 0x7365727a),
         ),
         eq(prev(ADDR.overlay1), 0x7365727a),
-        eq(ADDR.battle_state, 0xc000),
+        andNext(
+          neq(prev(ADDR.battle_state), 0xc000),
+          eq(ADDR.battle_state, 0xc000),
+        ),
       ),
     ),
     ...range(0, 13).reduce((acc, n) => ({
       ...acc,
       [`alt${2 * n + 1}`]: define(
-        cond('Remember',   ADDR.in_battle_data_ptr2, '+', 0x137c),
+        cond('Remember',   ADDR.in_battle_data_ptr2, '+',  0x137c),
         // Check vehicle `n` is `wanzerName`
         cond('AddAddress', recall(),                 '&',  0xFFFFFF),
-        cond('',          dword_be(n * 620 + 0x09), '=',  numPrefix),
+        cond('',           dword_be(n * 620 + 0x09), '=',  numPrefix),
         // Check vehicle `n` is `wanzerName`
         cond('AddAddress', recall(),                 '&',  0xFFFFFF),
         cond('',           dword_be(n * 620 + 0x0d), '=',  numSuffix),
@@ -318,7 +321,7 @@ function makeAchievements(set: AchievementSet) {
     // Placeholder for #15
     // Placeholder for #16
     {
-      stageID: 0x4d, progressionState: 0x4c,
+      stageID: 0x4c, progressionState: 0x4b,
       title: `This Is Going to Blow up the Base, Right?`,
       description: `Disable the mobile fortress Tianlei on the USN route`,
       points: 10,
@@ -892,7 +895,10 @@ function makeAchievements(set: AchievementSet) {
           ),
           neq(ADDR.progression_state, 0x0b),
           neq(ADDR.scene_id, 0x0c),
-          eq(ADDR.battle_state, 0xc000),
+          andNext(
+            neq(prev(ADDR.battle_state), 0xc000),
+            eq(ADDR.battle_state, 0xc000),
+          ),
         ),
       )
     }
@@ -933,7 +939,10 @@ function makeAchievements(set: AchievementSet) {
           eq(prev(ADDR.overlay1), 0x7365727a),
           neq(ADDR.progression_state, 0x0f),
           neq(ADDR.scene_id, 0x14),
-          eq(ADDR.battle_state, 0xc000),
+          andNext(
+            neq(prev(ADDR.battle_state), 0xc000),
+            eq(ADDR.battle_state, 0xc000),
+          ),
         ),
       ),
       ...range(0, 13).reduce((acc, n) => ({
@@ -1061,7 +1070,10 @@ function makeAchievements(set: AchievementSet) {
             neq(ADDR.scene_id, 0x46),
             neq(ADDR.scene_id, 0x47),
           ),
-          eq(ADDR.battle_state, 0xc000),
+          andNext(
+            neq(prev(ADDR.battle_state), 0xc000),
+            eq(ADDR.battle_state, 0xc000),
+          ),
         ),
       ),
       alt1: define(
@@ -1151,7 +1163,10 @@ function makeAchievements(set: AchievementSet) {
           ),
           neq(ADDR.progression_state, 0x54),
           neq(ADDR.scene_id, 0x57),
-          eq(ADDR.battle_state, 0xc000),
+          andNext(
+            neq(prev(ADDR.battle_state), 0xc000),
+            eq(ADDR.battle_state, 0xc000),
+          ),
         ),
       )
     }
@@ -1167,11 +1182,8 @@ function makeAchievements(set: AchievementSet) {
         // Priming
         once(
           andNext(
+            eq(prev(ADDR.overlay1), 0x746e6573),
             eq(ADDR.overlay1, 0x66666569),
-            eq(ADDR.progression_state, 0x60),
-            eq(ADDR.scene_id, 0x62),
-            eq(prev(ADDR.battle_state), 0x01),
-            eq(ADDR.battle_state, 0x00),
           )
         ),
 
@@ -1212,7 +1224,10 @@ function makeAchievements(set: AchievementSet) {
           ),
           neq(ADDR.progression_state, 0x60),
           neq(ADDR.scene_id, 0x62),
-          eq(ADDR.battle_state, 0xc000),
+          andNext(
+            neq(prev(ADDR.battle_state), 0xc000),
+            eq(ADDR.battle_state, 0xc000),
+          ),
         ),
       )
     }
@@ -1293,7 +1308,10 @@ function makeAchievements(set: AchievementSet) {
           ),
           neq(ADDR.progression_state, 0x85),
           neq(ADDR.scene_id, 0x87),
-          eq(ADDR.battle_state, 0xc000),
+          andNext(
+            neq(prev(ADDR.battle_state), 0xc000),
+            eq(ADDR.battle_state, 0xc000),
+          ),
         ),
       )
     }
@@ -1427,7 +1445,7 @@ function makeAchievements(set: AchievementSet) {
 
   set.addAchievement({
     title: `Wanzerjacking`,
-    description: `After raising the elevator in the Nagoya sewers on the DHZ route, have Ryogo board an enemy wanzer`,
+    description: `After raising the elevator in the Nagoya sewers on the DHZ route (without having downloaded the sewer plans), have Ryogo board an enemy wanzer`,
     type: 'missable',
     points: 5,
     conditions: {
@@ -1437,34 +1455,30 @@ function makeAchievements(set: AchievementSet) {
         eq(ADDR.progression_state, 0xab),
         eq(ADDR.scene_id, 0xe6),
         eq(ADDR.battle_state, 0x00),
+        eq(ADDR.nagoya_sewer_plans, 0),
         gt(ADDR.ryogo_pilot_hp, 0),
 
         // Null checks
-        trigger( neq(ADDR.in_battle_data_ptr1, 0x00000000) ),
+        // trigger( neq(ADDR.in_battle_data_ptr1, 0x00000000) ),
         trigger( neq(ADDR.in_battle_data_ptr2, 0x00000000) ),
       ),
-      ...range(0, 34).reduce((acc, n) => ({
+      ...range(0, 13).reduce((acc, n) => ({
         ...acc,
         [`alt${n + 1}`]: define(
-          // Check actor `n` is not player wanzer/pilot
-          cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
-          cond('Trigger',    dword(0x10 + n * 4),      '>',  0x801225e0),
-          // Check actor `n` is vehicle and not pilot
-          cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
-          cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
-          cond('Trigger',    byte(0x00),               '!=', 0x00),
+          cond('Remember',   ADDR.in_battle_data_ptr2, '+', 0x137c),
+          // Check vehicle isn't destroyed
+          cond('AddAddress', recall(),                 '&',  0xFFFFFF),
+          cond('Trigger',    word(n * 620 + 0x86),     '!=', 0x00),
           // Check vehicle was without pilot
-          cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
-          cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
-          cond('Trigger',    prev(byte(0x03)),         '=',  0xFF),
+          cond('AddAddress', recall(),                 '&',  0xFFFFFF),
+          cond('Trigger',    prev(byte(n * 620 + 3)),  '=',  0xFF),
           // Check vehicle has pilot
-          cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
-          cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
-          cond('Trigger',    byte(0x03),               '!=', 0xFF),
+          cond('AddAddress', recall(),                 '&',  0xFFFFFF),
+          cond('Trigger',    byte(n * 620 + 3),        '!=', 0xFF),
           // Remember pilot index
-          cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
-          cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
-          cond('Remember',   byte(0x03),               '*',  0x04),
+          cond('AddAddress', recall(),                 '&',  0xFFFFFF),
+          cond('Remember',   byte(n * 620 + 3),        '*',  0x04),
+          
           // Build pointer to pilot's entry in actors pointer table
           cond('AddSource',  recall(),                 '+',  0x10),
           cond('Remember',   ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
@@ -1473,6 +1487,37 @@ function makeAchievements(set: AchievementSet) {
           cond('Trigger',    dword(0x00),              '=',  0x80118758),
         )
       }), {}),
+      // ...range(0, 34).reduce((acc, n) => ({
+      //   ...acc,
+      //   [`alt${n + 1}`]: define(
+      //     // Check actor `n` is not player wanzer/pilot
+      //     cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
+      //     cond('Trigger',    dword(0x10 + n * 4),      '>',  0x801225e0),
+      //     // Check actor `n` is vehicle and not pilot
+      //     cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
+      //     cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
+      //     cond('Trigger',    byte(0x00),               '!=', 0x00),
+      //     // Check vehicle was without pilot
+      //     cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
+      //     cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
+      //     cond('Trigger',    prev(byte(0x03)),         '=',  0xFF),
+      //     // Check vehicle has pilot
+      //     cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
+      //     cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
+      //     cond('Trigger',    byte(0x03),               '!=', 0xFF),
+      //     // Remember pilot index
+      //     cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
+      //     cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
+      //     cond('Remember',   byte(0x03),               '*',  0x04),
+          
+      //     // Build pointer to pilot's entry in actors pointer table
+      //     cond('AddSource',  recall(),                 '+',  0x10),
+      //     cond('Remember',   ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
+      //     // Check whether pilot is Ryogo
+      //     cond('AddAddress', recall()),
+      //     cond('Trigger',    dword(0x00),              '=',  0x80118758),
+      //   )
+      // }), {}),
     }
   });
 

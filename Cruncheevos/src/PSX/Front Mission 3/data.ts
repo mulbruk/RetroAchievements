@@ -49,6 +49,7 @@ export const ADDR = {
   lan_battle_skills:    (n: number) => byte(0x119824 + n),
   mayer_battle_skills:  (n: number) => byte(0x119998 + n),
   
+  nagoya_sewer_plans: bit2(0x124d18),
 
   twin_tiger_hunt_unread: bit2(0x124c78),
   twin_tiger_hunt_read:   bit3(0x124c78),
@@ -177,7 +178,7 @@ export const battleSkills: {id: number, skillName: string, partName: string, par
   {id: 0x07, skillName: 'AP-30%',         partName: 'Kasel M2',       partType: 'Legs' },
   {id: 0x08, skillName: 'AP-60%',         partName: 'Shunyo Mk111',   partType: 'Legs' },
   {id: 0x09, skillName: 'AP-0',           partName: 'Hoshun Mk112',   partType: 'Legs' },
-  {id: 0x0A, skillName: 'Evade 1 Up',     partName: 'Zeros',          partType: 'Body' },
+  {id: 0x0A, skillName: 'Evade 1 Up',     partName: 'Pare PAW1',      partType: 'Body' },
   {id: 0x0B, skillName: 'Evade 2 Up',     partName: 'Whisk',          partType: 'Legs' },
   {id: 0x0C, skillName: 'Evade-MAX',      partName: 'Shunwang 1',     partType: 'Legs' },
   {id: 0x0D, skillName: 'Def-C1 Up',      partName: 'Genie',          partType: 'Body' },
@@ -186,7 +187,7 @@ export const battleSkills: {id: number, skillName: string, partName: string, par
   {id: 0x10, skillName: 'E-Def-C1 Down',  partName: 'Meledyne M1',    partType: 'Body' },
   {id: 0x11, skillName: 'E-Def-C2 Down',  partName: 'Tieqi 4',        partType: 'Body' },
   {id: 0x12, skillName: 'E-Def-C Nul',    partName: 'Whisk',          partType: 'Body' },
-  {id: 0x13, skillName: 'E-Evade 1 Down', partName: 'Pare PAW1',      partType: 'Legs' },
+  {id: 0x13, skillName: 'E-Evade 1 Down', partName: 'Zeros',          partType: 'Legs' },
   {id: 0x14, skillName: 'E-Evade 2 Down', partName: 'Vinedrai',       partType: 'Body' },
   {id: 0x15, skillName: 'E-Evade Nul',    partName: 'Shunwang 1',     partType: 'Body' },
   {id: 0x16, skillName: 'E-Acc1 Down',    partName: 'Pare PAW1',      partType: 'Body' },
