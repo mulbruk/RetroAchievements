@@ -95,11 +95,17 @@ function wanzerCapture(wanzerName: string) {
       neq(ADDR.scene_id, 0x02),
       neq(ADDR.scene_id, 0x76),
 
+      orNext(
+        lt(ADDR.scene_id, 0xc8),
+        gt(ADDR.scene_id, 0xdc),
+      ),
+
       // Null checks
       trigger(
         orNext(
           neq(ADDR.in_battle_data_ptr1, 0x00000000),
-          eq(ADDR.battle_state, 0x01)
+          eq(ADDR.battle_state, 0x01),
+          eq(ADDR.scene_id, 0xa4),
         )
       ),
       trigger( neq(ADDR.in_battle_data_ptr2, 0x00000000) ),
@@ -127,6 +133,14 @@ function wanzerCapture(wanzerName: string) {
     ...range(0, 13).reduce((acc, n) => ({
       ...acc,
       [`alt${2 * n + 1}`]: define(
+        cond('Remember', ADDR.in_battle_data_ptr2, '+', 0x137c + n * 620),
+        orNext(
+          ...range(0, 34).map((n) => define(
+            cond('AddAddress', ADDR.in_battle_data_ptr2, '&', 0xFFFFFF),
+            cond('',           dword(0x10 + n * 4),      '=', recall()),
+          )),
+        ),
+
         cond('Remember',   ADDR.in_battle_data_ptr2, '+',  0x137c),
         // Check vehicle `n` is `wanzerName`
         cond('AddAddress', recall(),                 '&',  0xFFFFFF),
@@ -145,6 +159,14 @@ function wanzerCapture(wanzerName: string) {
     ...range(0, 13).reduce((acc, n) => ({
       ...acc,
       [`alt${2 * n + 2}`]: define(
+        cond('Remember', ADDR.in_battle_data_ptr2, '+', 0x137c + n * 620),
+        orNext(
+          ...range(0, 34).map((n) => define(
+            cond('AddAddress', ADDR.in_battle_data_ptr2, '&', 0xFFFFFF),
+            cond('',           dword(0x10 + n * 4),      '=', recall()),
+          )),
+        ),
+
         cond('Remember',   ADDR.in_battle_data_ptr2, '+', 0x137c),
         // Check vehicle `n` is `wanzerName`
         cond('AddAddress', recall(),                 '&',  0xFFFFFF),
@@ -1107,11 +1129,8 @@ function makeAchievements(set: AchievementSet) {
         // Priming
         once(
           andNext(
+            eq(prev(ADDR.overlay1), 0x746e6573),
             eq(ADDR.overlay1, 0x66666569),
-            eq(ADDR.progression_state, 0x54),
-            eq(ADDR.scene_id, 0x57),
-            eq(prev(ADDR.battle_state), 0x01),
-            eq(ADDR.battle_state, 0x00),
           )
         ),
 
@@ -1264,11 +1283,8 @@ function makeAchievements(set: AchievementSet) {
         // Priming
         once(
           andNext(
+            eq(prev(ADDR.overlay1), 0x746e6573),
             eq(ADDR.overlay1, 0x66666569),
-            eq(ADDR.progression_state, 0x85),
-            eq(ADDR.scene_id, 0x87),
-            eq(prev(ADDR.battle_state), 0x01),
-            eq(ADDR.battle_state, 0x00),
           )
         ),
 
@@ -1327,12 +1343,9 @@ function makeAchievements(set: AchievementSet) {
         // Priming
         once(
           andNext(
+            eq(prev(ADDR.overlay1), 0x746e6573),
             eq(ADDR.overlay1, 0x66666569),
-            eq(ADDR.progression_state, 0x94),
-            eq(ADDR.scene_id, 0x95),
-            eq(prev(ADDR.battle_state), 0x01),
-            eq(ADDR.battle_state, 0x00),
-          )
+          ),
         ),
 
         // Null checks
@@ -1344,7 +1357,14 @@ function makeAchievements(set: AchievementSet) {
           neq(ADDR.overlay1, 0x66666569),
           neq(ADDR.progression_state, 0x94),
           neq(ADDR.scene_id, 0x95),
-          neq(ADDR.battle_state, 0x00),
+          andNext(
+            neq(prev(ADDR.battle_state), 0x0001),
+            eq(ADDR.battle_state, 0x0001),
+          ),
+          andNext(
+            neq(prev(ADDR.battle_state), 0xc000),
+            eq(ADDR.battle_state, 0xc000),
+          ),
         ),
       ),
       ...range(0, 34).reduce((acc, n) => ({
