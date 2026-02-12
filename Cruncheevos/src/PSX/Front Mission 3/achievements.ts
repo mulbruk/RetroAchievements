@@ -759,7 +759,7 @@ function makeAchievements(set: AchievementSet) {
   set.addAchievement({
     title: `USN Route - Platinum Medalist III`,
     description: `Receive 69 platinum medals on the USN route`,
-    points: 25,
+    points: 50,
     id: 526320,
     conditions: {
       core: define(
@@ -804,7 +804,7 @@ function makeAchievements(set: AchievementSet) {
   set.addAchievement({
     title: `DHZ Route - Platinum Medalist III`,
     description: `Receive 59 platinum medals on the DHZ route`,
-    points: 25,
+    points: 50,
     id: 526323,
     conditions: {
       core: define(
@@ -840,7 +840,7 @@ function makeAchievements(set: AchievementSet) {
             eq(ADDR.overlay1, 0x66666569),
             eq(ADDR.progression_state, 0x0b),
             eq(ADDR.scene_id, 0x0c),
-            eq(prev(ADDR.battle_state), 0x01),
+            neq(prev(ADDR.battle_state), 0x00),
             eq(ADDR.battle_state, 0x00),
           )
         ),
@@ -1367,55 +1367,33 @@ function makeAchievements(set: AchievementSet) {
           ),
         ),
       ),
-      ...range(0, 34).reduce((acc, n) => ({
+      ...range(0, 13).reduce((acc, n) => ({
         ...acc,
         [`alt${n + 1}`]: define(
           // Check for player phase
           cond('',           ADDR.battle_phase,        '=', 0x00),
-
+          
           // Check acting unit is railcar
           cond('AddAddress', ADDR.in_battle_data_ptr1, '&', 0xFFFFFF),
           cond('AddAddress', dword(0x158),             '&', 0xFFFFFF),
           cond('Trigger',    dword_be(0x09),           '=', 0x41726D6F),
-          
-          // Check actor `n` is vehicle and not pilot
-          cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
-          cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
-          cond('Trigger',    byte(0x00),               '!=', 0x00),
-          // Check vehicle has pilot
-          cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
-          cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
-          cond('Trigger',    byte(0x03),               '!=', 0xFF),
-          // Remember pilot index
-          cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
-          cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
-          cond('Remember',   byte(0x03),               '*',  0x04),
-          // Build pointer to pilot's entry in actors pointer table
-          cond('AddSource',  recall(),                 '+',  0x10),
-          cond('Remember',   ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
-          // Check whether pilot is player or computer
-          //   Player pilots live in the range 0x1182fc-0x119d23
-          //   Computer pilots exist in a dynamic region above 0x1225e0
-          cond('AddAddress', recall()),
-          cond('Trigger',    dword(0x00),              '>', ADDR.in_battle_data_ptr2),
-          // Check vehicle health on previous frame
-          cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
-          cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
-          cond('Trigger',    prev(word(0x86)),         '>',  0x00),
-          // Check vehicle health on current frame
-          cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
-          cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
-          cond('Trigger',    word(0x86),               '=',  0x00),
 
+          // Check enemy wanzer is destroyed
+          cond('Remember', ADDR.in_battle_data_ptr2,     '+', 0x137c),
+          cond('Remember', recall(),                     '&', 0xFFFFFF),
+          cond('AddAddress', recall()),
+          cond('',           prev(word(n * 620 + 0x86)), '>', 0x00),
+          cond('AddAddress', recall()),
+          cond('Trigger',    word(n * 620 + 0x86),       '=', 0x00),
         )
       }), {}),
-      ...range(0, 34).reduce((acc, n) => ({
+      ...range(0, 13).reduce((acc, n) => ({
         ...acc,
-        [`alt${n + 35}`]: define(
+        [`alt${n + 14}`]: define(
           // Check for enemy phase
           cond('',           ADDR.battle_phase,        '=', 0x01),
-
-          // Check targeted unit is railcar --------------------
+          
+          // Check targeted unit is railcar
           // Grab actors table index of targeted unit
           cond('AddAddress', ADDR.in_battle_data_ptr1, '&', 0xFFFFFF),
           cond('AddAddress', dword(0x144),             '&', 0xFFFFFF),
@@ -1430,36 +1408,116 @@ function makeAchievements(set: AchievementSet) {
           cond('AddAddress', recall()),
           cond('Trigger',    dword_be(0x09),           '=', 0x41726D6F),
 
-          // Check actor `n` is vehicle and not pilot
-          cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
-          cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
-          cond('Trigger',    byte(0x00),               '!=', 0x00),
-          // Check vehicle has pilot
-          cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
-          cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
-          cond('Trigger',    byte(0x03),               '!=', 0xFF),
-          // Remember pilot index
-          cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
-          cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
-          cond('Remember',   byte(0x03),               '*',  0x04),
-          // Build pointer to pilot's entry in actors pointer table
-          cond('AddSource',  recall(),                 '+',  0x10),
-          cond('Remember',   ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
-          // Check whether pilot is player or computer
-          //   Player pilots live in the range 0x1182fc-0x119d23
-          //   Computer pilots exist in a dynamic region above 0x1225e0
+          // Check enemy wanzer is destroyed
+          cond('Remember', ADDR.in_battle_data_ptr2,     '+',  0x137c),
+          cond('Remember', recall(),                     '&',  0xFFFFFF),
           cond('AddAddress', recall()),
-          cond('Trigger',    dword(0x00),              '>', ADDR.in_battle_data_ptr2),
-          // Check vehicle health on previous frame
-          cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
-          cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
-          cond('Trigger',    prev(word(0x86)),         '>',  0x00),
-          // Check vehicle health on current frame
-          cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
-          cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
-          cond('Trigger',    word(0x86),               '=',  0x00),
+          cond('',           dword_be(n * 620 + 0x09),   '!=', 0x41726D6F),
+          cond('AddAddress', recall()),
+          cond('',           prev(word(n * 620 + 0x86)), '>',  0x00),
+          cond('AddAddress', recall()),
+          cond('Trigger',    word(n * 620 + 0x86),       '=',  0x00),
         )
       }), {}),
+      // ...range(0, 34).reduce((acc, n) => ({
+      //   ...acc,
+      //   [`alt${n + 1}`]: define(
+      //     // Check for player phase
+      //     cond('',           ADDR.battle_phase,        '=', 0x00),
+
+      //     // Check acting unit is railcar
+      //     cond('AddAddress', ADDR.in_battle_data_ptr1, '&', 0xFFFFFF),
+      //     cond('AddAddress', dword(0x158),             '&', 0xFFFFFF),
+      //     cond('Trigger',    dword_be(0x09),           '=', 0x41726D6F),
+          
+      //     // Null pointer check
+      //     cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
+      //     cond('Trigger',    dword(0x10 + n * 4),      '!=', 0x00),
+      //     // Check actor `n` is vehicle and not pilot
+      //     cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
+      //     cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
+      //     cond('Trigger',    byte(0x00),               '!=', 0x00),
+      //     // Check vehicle has pilot
+      //     cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
+      //     cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
+      //     cond('Trigger',    byte(0x03),               '!=', 0xFF),
+      //     // Remember pilot index
+      //     cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
+      //     cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
+      //     cond('Remember',   byte(0x03),               '*',  0x04),
+      //     // Build pointer to pilot's entry in actors pointer table
+      //     cond('AddSource',  recall(),                 '+',  0x10),
+      //     cond('Remember',   ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
+      //     // Check whether pilot is player or computer
+      //     //   Player pilots live in the range 0x1182fc-0x119d23
+      //     //   Computer pilots exist in a dynamic region above 0x1225e0
+      //     cond('AddAddress', recall()),
+      //     cond('Trigger',    dword(0x00),              '>', ADDR.in_battle_data_ptr2),
+      //     // Check vehicle health on previous frame
+      //     cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
+      //     cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
+      //     cond('Trigger',    prev(word(0x86)),         '>',  0x00),
+      //     // Check vehicle health on current frame
+      //     cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
+      //     cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
+      //     cond('Trigger',    word(0x86),               '=',  0x00),
+
+      //   )
+      // }), {}),
+      // ...range(0, 34).reduce((acc, n) => ({
+      //   ...acc,
+      //   [`alt${n + 35}`]: define(
+      //     // Check for enemy phase
+      //     cond('',           ADDR.battle_phase,        '=', 0x01),
+
+      //     // Check targeted unit is railcar --------------------
+      //     // Grab actors table index of targeted unit
+      //     cond('AddAddress', ADDR.in_battle_data_ptr1, '&', 0xFFFFFF),
+      //     cond('AddAddress', dword(0x144),             '&', 0xFFFFFF),
+      //     cond('Remember',   byte(0x0f),               '*', 0x04),
+      //     // Build pointer into actors table
+      //     cond('AddSource',  recall(),                 '+', 0x10),
+      //     cond('Remember',   ADDR.in_battle_data_ptr2, '&', 0xFFFFFF),
+      //     // Build pointer into actor data
+      //     cond('AddAddress', recall()),
+      //     cond('Remember',   dword(0x00),              '&', 0xFFFFFF),
+      //     // Check actor name
+      //     cond('AddAddress', recall()),
+      //     cond('Trigger',    dword_be(0x09),           '=', 0x41726D6F),
+
+      //     // Null pointer check
+      //     cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
+      //     cond('Trigger',    dword(0x10 + n * 4),      '!=', 0x00),
+      //     // Check actor `n` is vehicle and not pilot
+      //     cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
+      //     cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
+      //     cond('Trigger',    byte(0x00),               '!=', 0x00),
+      //     // Check vehicle has pilot
+      //     cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
+      //     cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
+      //     cond('Trigger',    byte(0x03),               '!=', 0xFF),
+      //     // Remember pilot index
+      //     cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
+      //     cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
+      //     cond('Remember',   byte(0x03),               '*',  0x04),
+      //     // Build pointer to pilot's entry in actors pointer table
+      //     cond('AddSource',  recall(),                 '+',  0x10),
+      //     cond('Remember',   ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
+      //     // Check whether pilot is player or computer
+      //     //   Player pilots live in the range 0x1182fc-0x119d23
+      //     //   Computer pilots exist in a dynamic region above 0x1225e0
+      //     cond('AddAddress', recall()),
+      //     cond('Trigger',    dword(0x00),              '>', ADDR.in_battle_data_ptr2),
+      //     // Check vehicle health on previous frame
+      //     cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
+      //     cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
+      //     cond('Trigger',    prev(word(0x86)),         '>',  0x00),
+      //     // Check vehicle health on current frame
+      //     cond('AddAddress', ADDR.in_battle_data_ptr2, '&',  0xFFFFFF),
+      //     cond('AddAddress', dword(0x10 + n * 4),      '&',  0xFFFFFF),
+      //     cond('Trigger',    word(0x86),               '=',  0x00),
+      //   )
+      // }), {}),
     }
   });
 
