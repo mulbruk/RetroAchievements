@@ -1,4 +1,5 @@
 import { Condition } from "@cruncheevos/core";
+import { match } from "ts-pattern";
 
 export function bit0(addr: number): Condition.Value {
   return { type: 'Mem', size: 'Bit0', value: addr }
@@ -104,4 +105,19 @@ export function constant(val: number): Condition.Value {
 
 export function FLOAT(val: number): Condition.Value {
   return { type: 'Float', size: '', value: val} ;
+}
+
+export function bit(n: number): ((addr: number) => Condition.Value) {
+  return (addr: number) => {
+    return match(n)
+      .with(0, () => bit0(addr))
+      .with(1, () => bit1(addr))
+      .with(2, () => bit2(addr))
+      .with(3, () => bit3(addr))
+      .with(4, () => bit4(addr))
+      .with(5, () => bit5(addr))
+      .with(6, () => bit6(addr))
+      .with(7, () => bit7(addr))
+      .otherwise(() => { throw new Error(`Invalid bit number ${n}`); });
+  }
 }

@@ -1,8 +1,8 @@
 import { AchievementSet, Condition, define } from '@cruncheevos/core';
 
-import { cond, prev, eq, neq, lt, recall } from '../common/comparison.js';
-import { range } from '../common/util.js';
-import { dword_be, word_be } from '../common/value.js';
+import { cond, prev, eq, neq, lt, recall } from '../../common/comparison.js';
+import { range } from '../../common/util.js';
+import { dword_be, word_be } from '../../common/value.js';
 
 import { FLAGS_EN, GAME_STATE_EN } from './data.js';
 

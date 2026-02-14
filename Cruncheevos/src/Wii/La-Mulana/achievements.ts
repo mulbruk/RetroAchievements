@@ -1,13 +1,11 @@
 import {
-  AchievementSet, Condition, ConditionBuilder,
-  define, once, andNext, orNext, resetIf,
-  trigger,
-  measuredIf,
+  AchievementSet, ConditionBuilder,
+  define, once, andNext, orNext, resetIf, trigger, measuredIf,
 } from "@cruncheevos/core";
 import { match } from "ts-pattern";
-import { cond, prev, eq, neq, gt, gte, lt, lte, recall } from "../common/comparison.js";
-import { range, strToDwordBE, timeToFramesNTSC, timeToMilliseconds } from "../common/util.js";
-import { dword_be } from "../common/value.js";
+import { cond, prev, eq, neq, gt, gte, lt, lte, recall } from "../../common/comparison.js";
+import { range, strToDwordBE, timeToFramesNTSC, timeToMilliseconds } from "../../common/util.js";
+import { dword_be } from "../../common/value.js";
 import {Locale, FooBar, FLAGS, GAME_STATE, SYSTEM, LEMEZA, INVENTORY, FLAGS_EX} from "./data.js";
 
 // ---------------------------------------------------------------------------------------------------
@@ -77,6 +75,34 @@ function eventFlagTrigger(data: eventFlagAchievementData) {
       triggerLogic('JP')
     )
   }
+}
+
+function winGameConditions(ll: Locale) {
+  return define(
+    // Thoth's Room
+    eq(GAME_STATE.field_id(ll),    0x03),
+    eq(GAME_STATE.room_id(ll),     0x03),
+    eq(GAME_STATE.screen_id(ll),   0x00),
+    
+    // Verify all guardians defeated to block laptop glitch shenanigans
+    eq(FLAGS.ankh_amphisbaena(ll), 0x03),
+    eq(FLAGS.ankh_sakit(ll),       0x03),
+    eq(FLAGS.ankh_ellmac(ll),      0x03),
+    eq(FLAGS.ankh_bahamut(ll),     0x03),
+    eq(FLAGS.ankh_viy(ll),         0x03),
+    eq(FLAGS.ankh_palenque(ll),    0x03),
+    eq(FLAGS.ankh_baphomet(ll),    0x03),
+    eq(FLAGS.ankh_tiamat(ll),      0x03),
+    eq(FLAGS.mother_defeated(ll),  0x01),
+    
+    // Since we're using a music trigger for timing, ensure laptop is closed to block the edge
+    // case of using Enga Musica to play 'Run toward the sun' immediately before escaping
+    eq(GAME_STATE.msx_open(ll), 0x00),
+    
+    // CONGRATULATIONS!
+    neq(prev(GAME_STATE.music_id(ll)), 0x2b),
+    eq(GAME_STATE.music_id(ll), 0x2b)
+  )
 }
 
 function makeAchievements(set: AchievementSet) {
@@ -166,49 +192,11 @@ function makeAchievements(set: AchievementSet) {
           isRegion('NA'),
           isRegion('EU'),
         ),
-        // Thoth's Room
-        eq(GAME_STATE.field_id('NA'),    0x03),
-        eq(GAME_STATE.room_id('NA'),     0x03),
-        eq(GAME_STATE.screen_id('NA'),   0x00),
-        // Verify all guardians defeated to block laptop glitch shenanigans
-        eq(FLAGS.ankh_amphisbaena('NA'), 0x03),
-        eq(FLAGS.ankh_sakit('NA'),       0x03),
-        eq(FLAGS.ankh_ellmac('NA'),      0x03),
-        eq(FLAGS.ankh_bahamut('NA'),     0x03),
-        eq(FLAGS.ankh_viy('NA'),         0x03),
-        eq(FLAGS.ankh_palenque('NA'),    0x03),
-        eq(FLAGS.ankh_baphomet('NA'),    0x03),
-        eq(FLAGS.ankh_tiamat('NA'),      0x03),
-        eq(FLAGS.mother_defeated('NA'),  0x01),
-        // Since we're using a music trigger for timing, ensure laptop is closed to block the edge
-        // case of using Enga Musica to play 'Run toward the sun' immediately before escaping
-        eq(GAME_STATE.msx_open('NA'), 0x00),
-        // CONGRATULATIONS!
-        neq(prev(GAME_STATE.music_id('NA')), 0x2b),
-        eq(GAME_STATE.music_id('NA'), 0x2b)
+        winGameConditions('NA')
       ),
       alt2: define(
         isRegion('JP'),
-        // Thoth's Room
-        eq(GAME_STATE.field_id('JP'),    0x03),
-        eq(GAME_STATE.room_id('JP'),     0x03),
-        eq(GAME_STATE.screen_id('JP'),   0x00),
-        // Verify all guardians defeated to block laptop glitch shenanigans
-        eq(FLAGS.ankh_amphisbaena('JP'), 0x03),
-        eq(FLAGS.ankh_sakit('JP'),       0x03),
-        eq(FLAGS.ankh_ellmac('JP'),      0x03),
-        eq(FLAGS.ankh_bahamut('JP'),     0x03),
-        eq(FLAGS.ankh_viy('JP'),         0x03),
-        eq(FLAGS.ankh_palenque('JP'),    0x03),
-        eq(FLAGS.ankh_baphomet('JP'),    0x03),
-        eq(FLAGS.ankh_tiamat('JP'),      0x03),
-        eq(FLAGS.mother_defeated('JP'),  0x01),
-        // Since we're using a music trigger for timing, ensure laptop is closed to block the edge
-        // case of using Enga Musica to play 'Run toward the sun' immediately before escaping
-        eq(GAME_STATE.msx_open('JP'), 0x00),
-        // CONGRATULATIONS!
-        neq(prev(GAME_STATE.music_id('JP')), 0x2b),
-        eq(GAME_STATE.music_id('JP'), 0x2b)
+        winGameConditions('JP')
       ),
     }
   });
@@ -417,13 +405,6 @@ function makeAchievements(set: AchievementSet) {
       flag: FLAGS.lamp_of_time, before: 1, after: 2,
       location: { fieldID: 0x07, roomID: 0x06, screenID: 0x01 }
     },
-    // {
-    //   title: `[Needs title] Dragon Bone`,
-    //   description: `Collect the Dragon Bone`,
-    //   points: 0,
-    //   flag: FLAGS.dragon_bone, before: 1, after: 2, // TODO fix
-    //   location: { fieldID: 0x07, roomID: 0x03, screenID: 0x02 }
-    // },
     {
       title: `[Needs title] Vessel`,
       description: `Collect the Vessel`,
@@ -463,6 +444,18 @@ function makeAchievements(set: AchievementSet) {
     });
   });
 
+  const collectBuckler = (ll: Locale) => define(
+    neq(prev(GAME_STATE.field_id(ll)), 0xff),
+    eq(GAME_STATE.field_id(ll), 0x01),
+    eq(GAME_STATE.room_id(ll),  0x02),
+    eq(GAME_STATE.screen_id(ll),0x01),
+    cond('',           GAME_STATE.inventory_ptr(ll), '!=', 0x00),
+    cond('AddAddress', GAME_STATE.inventory_ptr(ll), '&',  0x7fffffff),
+    cond('',           prev(INVENTORY.buckler),      '=',  0),
+    cond('AddAddress', GAME_STATE.inventory_ptr(ll), '&',  0x7fffffff),
+    cond('',           INVENTORY.buckler,            '=',  1),
+  )
+
   set.addAchievement({
     title: `[Needs title] Buckler`,
     description: `Collect the Buckler`,
@@ -474,30 +467,26 @@ function makeAchievements(set: AchievementSet) {
           isRegion('NA'),
           isRegion('EU'),
         ),
-        neq(prev(GAME_STATE.field_id('NA')), 0xff),
-        eq(GAME_STATE.field_id('NA'), 0x01),
-        eq(GAME_STATE.room_id('NA'),  0x02),
-        eq(GAME_STATE.screen_id('NA'),0x01),
-        cond('',           GAME_STATE.inventory_ptr('NA'), '!=', 0x00),
-        cond('AddAddress', GAME_STATE.inventory_ptr('NA'), '&',  0x7fffffff),
-        cond('',           prev(INVENTORY.buckler),        '=',  0),
-        cond('AddAddress', GAME_STATE.inventory_ptr('NA'), '&',  0x7fffffff),
-        cond('',           INVENTORY.buckler,              '=',  1),
+        collectBuckler('NA')
       ),
       alt2: define(
         isRegion('JP'),
-        neq(prev(GAME_STATE.field_id('JP')), 0xff),
-        eq(GAME_STATE.field_id('JP'), 0x01),
-        eq(GAME_STATE.room_id('JP'),  0x02),
-        eq(GAME_STATE.screen_id('JP'),0x01),
-        cond('',           GAME_STATE.inventory_ptr('JP'), '!=', 0x00),
-        cond('AddAddress', GAME_STATE.inventory_ptr('JP'), '&',  0x7fffffff),
-        cond('',           prev(INVENTORY.buckler),        '=',  0),
-        cond('AddAddress', GAME_STATE.inventory_ptr('JP'), '&',  0x7fffffff),
-        cond('',           INVENTORY.buckler,              '=',  1),
+        collectBuckler('JP')
       )
     }
   });
+
+  const collectDragonBone = (ll: Locale) => define(
+    neq(prev(GAME_STATE.field_id(ll)), 0xff),
+    eq(GAME_STATE.field_id(ll), 0x07),
+    eq(GAME_STATE.room_id(ll),  0x0c),
+    eq(GAME_STATE.screen_id(ll),0x02),
+    cond('',           GAME_STATE.inventory_ptr(ll), '!=', 0x00),
+    cond('AddAddress', GAME_STATE.inventory_ptr(ll), '&',  0x7fffffff),
+    cond('',           prev(INVENTORY.dragon_bone),    '=',  0),
+    cond('AddAddress', GAME_STATE.inventory_ptr(ll), '&',  0x7fffffff),
+    cond('',           INVENTORY.dragon_bone,          '>=', 1),
+  )
 
   set.addAchievement({
     title: `[Needs title] Dragon Bone`,
@@ -510,35 +499,37 @@ function makeAchievements(set: AchievementSet) {
           isRegion('NA'),
           isRegion('EU'),
         ),
-        neq(prev(GAME_STATE.field_id('NA')), 0xff),
-        eq(GAME_STATE.field_id('NA'), 0x07),
-        eq(GAME_STATE.room_id('NA'),  0x0c),
-        eq(GAME_STATE.screen_id('NA'),0x02),
-        cond('',           GAME_STATE.inventory_ptr('NA'), '!=', 0x00),
-        cond('AddAddress', GAME_STATE.inventory_ptr('NA'), '&',  0x7fffffff),
-        cond('',           prev(INVENTORY.dragon_bone),    '=',  0),
-        cond('AddAddress', GAME_STATE.inventory_ptr('NA'), '&',  0x7fffffff),
-        cond('',           INVENTORY.dragon_bone,          '>=', 1),
+        collectDragonBone('NA')
       ),
       alt2: define(
         isRegion('JP'),
-        neq(prev(GAME_STATE.field_id('JP')), 0xff),
-        eq(GAME_STATE.field_id('JP'), 0x07),
-        eq(GAME_STATE.room_id('JP'),  0x0c),
-        eq(GAME_STATE.screen_id('JP'),0x02),
-        cond('',           GAME_STATE.inventory_ptr('JP'), '!=', 0x00),
-        cond('AddAddress', GAME_STATE.inventory_ptr('JP'), '&',  0x7fffffff),
-        cond('',           prev(INVENTORY.dragon_bone),    '=',  0),
-        cond('AddAddress', GAME_STATE.inventory_ptr('JP'), '&',  0x7fffffff),
-        cond('',           INVENTORY.dragon_bone,          '>=', 1),
+        collectDragonBone('JP')
       )
     }
   });
 
   // Collection (other) ----------------------------------------
+  const showAndTell = (ll: Locale) => define(
+    eq(GAME_STATE.location(ll), 0x010201),
+    ...range(0, 15).map(n =>
+      cond('AddSource', prev(FLAGS_EX.item_conversation(n)(ll))),
+    ),
+    cond('AddSource', prev(FLAGS_EX.hand_scanner_conversation(ll))),
+    cond('AddSource', prev(FLAGS_EX.diary_conversation(ll)), '/', 3),
+    cond('AddSource', prev(FLAGS_EX.mulana_talisman_conversation(ll))),
+    eq(0, 14),
+    ...range(0, 15).map(n =>
+      cond('AddSource', FLAGS_EX.item_conversation(n)(ll)),
+    ),
+    cond('AddSource', FLAGS_EX.hand_scanner_conversation(ll)),
+    cond('AddSource', FLAGS_EX.diary_conversation(ll), '/', 3),
+    cond('AddSource', FLAGS_EX.mulana_talisman_conversation(ll)),
+    cond('Measured', 0, '=', 15)
+  )
+
   set.addAchievement({
     title: `[Needs title] Xelpud Show and Tell`,
-    description: `Receive "helpful" advice from Xelpud about all use items`,
+    description: `Receive 15 pieces of "helpful" advice from Xelpud about inventory use items`,
     points: 5,
     type: 'missable',
     conditions: {
@@ -550,44 +541,27 @@ function makeAchievements(set: AchievementSet) {
             isRegion('EU'),
           )
         ),
-        eq(GAME_STATE.location('NA'), 0x010201),
-        ...range(0, 15).map(n =>
-          cond('AddSource', prev(FLAGS_EX.item_conversation(n)('NA'))),
-        ),
-        cond('AddSource', prev(FLAGS_EX.hand_scanner_conversation('NA'))),
-        cond('AddSource', prev(FLAGS_EX.diary_conversation('NA')), '/', 3),
-        cond('AddSource', prev(FLAGS_EX.mulana_talisman_conversation('NA'))),
-        eq(0, 16),
-        ...range(0, 15).map(n =>
-          cond('AddSource', FLAGS_EX.item_conversation(n)('NA')),
-        ),
-        cond('AddSource', FLAGS_EX.hand_scanner_conversation('NA')),
-        cond('AddSource', FLAGS_EX.diary_conversation('NA'), '/', 3),
-        cond('AddSource', FLAGS_EX.mulana_talisman_conversation('NA')),
-        cond('Measured', 0, '=', 17)
+        showAndTell('NA')
       ),
       alt2: define(
         measuredIf(
           isRegion('JP'),
         ),
-        eq(GAME_STATE.location('JP'), 0x010201),
-        ...range(0, 15).map(n =>
-          cond('AddSource', prev(FLAGS_EX.item_conversation(n)('JP'))),
-        ),
-        cond('AddSource', prev(FLAGS_EX.hand_scanner_conversation('JP'))),
-        cond('AddSource', prev(FLAGS_EX.diary_conversation('JP')), '/', 3),
-        cond('AddSource', prev(FLAGS_EX.mulana_talisman_conversation('JP'))),
-        eq(0, 16),
-        ...range(0, 15).map(n =>
-          cond('AddSource', FLAGS_EX.item_conversation(n)('JP')),
-        ),
-        cond('AddSource', FLAGS_EX.hand_scanner_conversation('JP')),
-        cond('AddSource', FLAGS_EX.diary_conversation('JP'), '/', 3),
-        cond('AddSource', FLAGS_EX.mulana_talisman_conversation('JP')),
-        cond('Measured', 0, '=', 17)
+        showAndTell('JP')
       ),
     }
   });
+  
+  const collectAllMaps = (ll: Locale) => define(
+    ...range(0, 17).map((n) =>
+      cond('AddSource', prev(FLAGS_EX.map(n)(ll)), '/', 2)
+    ),
+    eq(0, 16),
+    ...range(0, 17).map((n) =>
+      cond('AddSource', FLAGS_EX.map(n)(ll), '/', 2)
+    ),
+    cond('Measured', 0, '=', 17),
+  );
   
   set.addAchievement({
     title: `The Cartography Zome`,
@@ -604,32 +578,25 @@ function makeAchievements(set: AchievementSet) {
           ),
           neq(GAME_STATE.field_id('NA'), 0xff),
         ),
-        ...range(0, 17).map((n) =>
-          cond('AddSource', prev(FLAGS_EX.map(n)('NA')), '/', 2)
-        ),
-        eq(0, 16),
-        ...range(0, 17).map((n) =>
-          cond('AddSource', FLAGS_EX.map(n)('NA'), '/', 2)
-        ),
-        cond('Measured', 0, '=', 17),
+        collectAllMaps('NA')
       ),
       alt2: define(
         measuredIf(
           isRegion('JP'),
           neq(GAME_STATE.field_id('JP'), 0xff),
         ),
-        ...range(0, 17).map((n) =>
-          cond('AddSource', prev(FLAGS_EX.map(n)('JP')), '/', 2)
-        ),
-        eq(0, 16),
-        ...range(0, 17).map((n) =>
-          cond('AddSource', FLAGS_EX.map(n)('JP'), '/', 2)
-      ),
-        cond('Measured', 0, '=', 17),
+        collectAllMaps('JP')
       )
     }
   });
   
+  const xelpudEmails = (ll: Locale) => define(
+    eq(prev(FLAGS.email_counter(ll)), 43),
+    define(
+      eq(FLAGS.email_counter(ll), 44),
+    ).withLast({ flag: 'Measured'} )
+  );
+
   set.addAchievement({
     title: `I Need a Better Spam Filter`,
     description: `Receive all of Xelpud's emails`,
@@ -645,23 +612,44 @@ function makeAchievements(set: AchievementSet) {
           ),
           neq(GAME_STATE.field_id('NA'), 0xff),
         ),
-        eq(prev(FLAGS.email_counter('NA')), 43),
-        define(
-          eq(FLAGS.email_counter('NA'), 44),
-        ).withLast({ flag: 'Measured'} )
+        xelpudEmails('NA')
       ),
       alt2: define(
         measuredIf(
           isRegion('JP'),
           neq(GAME_STATE.field_id('JP'), 0xff),
         ),
-        eq(prev(FLAGS.email_counter('JP')), 43),
-        define(
-          eq(FLAGS.email_counter('JP'), 44),
-        ).withLast({ flag: 'Measured'} )
+        xelpudEmails('JP')
       )
     }
   });
+
+  const utilitySoftware = (ll: Locale) => define(
+    cond('AddSource', prev(FLAGS_EX.software(0)(ll)),  '/', 2),
+    cond('AddSource', prev(FLAGS_EX.software(1)(ll))),
+    cond('AddSource', prev(FLAGS_EX.software(2)(ll)),  '/', 2),
+    cond('AddSource', prev(FLAGS_EX.software(3)(ll)),  '/', 2),
+    cond('AddSource', prev(FLAGS_EX.software(4)(ll)),  '/', 2),
+    cond('AddSource', prev(FLAGS_EX.software(5)(ll))),
+    cond('AddSource', prev(FLAGS_EX.software(6)(ll))),
+    cond('AddSource', prev(FLAGS_EX.software(7)(ll))),
+    cond('AddSource', prev(FLAGS_EX.software(8)(ll))),
+    cond('AddSource', prev(FLAGS_EX.software(9)(ll))),
+    cond('AddSource', prev(FLAGS_EX.software(10)(ll))),
+    cond('', 0, '=', 10),
+    cond('AddSource', FLAGS_EX.software(0)(ll),  '/', 2),
+    cond('AddSource', FLAGS_EX.software(1)(ll)),
+    cond('AddSource', FLAGS_EX.software(2)(ll),  '/', 2),
+    cond('AddSource', FLAGS_EX.software(3)(ll),  '/', 2),
+    cond('AddSource', FLAGS_EX.software(4)(ll),  '/', 2),
+    cond('AddSource', FLAGS_EX.software(5)(ll)),
+    cond('AddSource', FLAGS_EX.software(6)(ll)),
+    cond('AddSource', FLAGS_EX.software(7)(ll)),
+    cond('AddSource', FLAGS_EX.software(8)(ll)),
+    cond('AddSource', FLAGS_EX.software(9)(ll)),
+    cond('AddSource', FLAGS_EX.software(10)(ll)),
+    cond('Measured', 0, '=', 11),
+  );
 
   set.addAchievement({
     title: `Download More RAM`,
@@ -677,64 +665,25 @@ function makeAchievements(set: AchievementSet) {
           ),
           neq(GAME_STATE.field_id('NA'), 0xff),
         ),
-        cond('AddSource', prev(FLAGS_EX.software(0)('NA')),  '/', 2),
-        cond('AddSource', prev(FLAGS_EX.software(1)('NA'))),
-        cond('AddSource', prev(FLAGS_EX.software(2)('NA')),  '/', 2),
-        cond('AddSource', prev(FLAGS_EX.software(3)('NA')),  '/', 2),
-        cond('AddSource', prev(FLAGS_EX.software(4)('NA')),  '/', 2),
-        cond('AddSource', prev(FLAGS_EX.software(5)('NA'))),
-        cond('AddSource', prev(FLAGS_EX.software(6)('NA'))),
-        cond('AddSource', prev(FLAGS_EX.software(7)('NA'))),
-        cond('AddSource', prev(FLAGS_EX.software(8)('NA'))),
-        cond('AddSource', prev(FLAGS_EX.software(9)('NA'))),
-        cond('AddSource', prev(FLAGS_EX.software(10)('NA'))),
-        cond('', 0, '=', 10),
-        cond('AddSource', FLAGS_EX.software(0)('NA'),  '/', 2),
-        cond('AddSource', FLAGS_EX.software(1)('NA')),
-        cond('AddSource', FLAGS_EX.software(2)('NA'),  '/', 2),
-        cond('AddSource', FLAGS_EX.software(3)('NA'),  '/', 2),
-        cond('AddSource', FLAGS_EX.software(4)('NA'),  '/', 2),
-        cond('AddSource', FLAGS_EX.software(5)('NA')),
-        cond('AddSource', FLAGS_EX.software(6)('NA')),
-        cond('AddSource', FLAGS_EX.software(7)('NA')),
-        cond('AddSource', FLAGS_EX.software(8)('NA')),
-        cond('AddSource', FLAGS_EX.software(9)('NA')),
-        cond('AddSource', FLAGS_EX.software(10)('NA')),
-        cond('Measured', 0, '=', 11),
+        utilitySoftware('NA')
       ),
       alt2: define(
         measuredIf(
           isRegion('JP'),
           neq(GAME_STATE.field_id('JP'), 0xff),
         ),
-        cond('AddSource', prev(FLAGS_EX.software(0)('JP')),  '/', 2),
-        cond('AddSource', prev(FLAGS_EX.software(1)('JP'))),
-        cond('AddSource', prev(FLAGS_EX.software(2)('JP')),  '/', 2),
-        cond('AddSource', prev(FLAGS_EX.software(3)('JP')),  '/', 2),
-        cond('AddSource', prev(FLAGS_EX.software(4)('JP')),  '/', 2),
-        cond('AddSource', prev(FLAGS_EX.software(5)('JP'))),
-        cond('AddSource', prev(FLAGS_EX.software(6)('JP'))),
-        cond('AddSource', prev(FLAGS_EX.software(7)('JP'))),
-        cond('AddSource', prev(FLAGS_EX.software(8)('JP'))),
-        cond('AddSource', prev(FLAGS_EX.software(9)('JP'))),
-        cond('AddSource', prev(FLAGS_EX.software(10)('JP'))),
-        cond('', 0, '=', 10),
-        cond('AddSource', FLAGS_EX.software(0)('JP'),  '/', 2),
-        cond('AddSource', FLAGS_EX.software(1)('JP')),
-        cond('AddSource', FLAGS_EX.software(2)('JP'),  '/', 2),
-        cond('AddSource', FLAGS_EX.software(3)('JP'),  '/', 2),
-        cond('AddSource', FLAGS_EX.software(4)('JP'),  '/', 2),
-        cond('AddSource', FLAGS_EX.software(5)('JP')),
-        cond('AddSource', FLAGS_EX.software(6)('JP')),
-        cond('AddSource', FLAGS_EX.software(7)('JP')),
-        cond('AddSource', FLAGS_EX.software(8)('JP')),
-        cond('AddSource', FLAGS_EX.software(9)('JP')),
-        cond('AddSource', FLAGS_EX.software(10)('JP')),
-        cond('Measured', 0, '=', 11),
+        utilitySoftware('JP')
       )
     }
   });
   
+  const fairyPoints = (ll: Locale) => define(
+    eq(prev(FLAGS.fairies_counter(ll)), 8),
+    define(
+      eq(FLAGS.fairies_counter(ll), 9),
+    ).withLast({ flag: 'Measured'} )
+  );
+
   set.addAchievement({
     title: `[Needs title] Fairy Points`,
     description: `Visit all fairy points`,
@@ -750,24 +699,24 @@ function makeAchievements(set: AchievementSet) {
           ),
           neq(GAME_STATE.field_id('NA'), 0xff),
         ),
-        eq(prev(FLAGS.fairies_counter('NA')), 8),
-        define(
-          eq(FLAGS.fairies_counter('NA'), 9),
-        ).withLast({ flag: 'Measured'} )
+        fairyPoints('NA')
       ),
       alt2: define(
         measuredIf(
           isRegion('JP'),
           neq(GAME_STATE.field_id('JP'), 0xff),
         ),
-        eq(prev(FLAGS.fairies_counter('JP')), 8),
-        define(
-          eq(FLAGS.fairies_counter('JP'), 9),
-        ).withLast({ flag: 'Measured'} )
+        fairyPoints('JP')
       )
     }
   });
   
+  const fishmanShop = (ll: Locale) => define(
+    eq(GAME_STATE.location(ll), 0x040303),
+    eq(prev(FLAGS.gyonin_primed(ll)), 0),
+    eq(FLAGS.gyonin_primed(ll), 1),
+  );
+
   set.addAchievement({
     title: `[Needs title] Mr Fishman's Shop`,
     description: `[Needs description]`,
@@ -780,18 +729,20 @@ function makeAchievements(set: AchievementSet) {
           isRegion('NA'),
           isRegion('EU'),
         ),
-        eq(GAME_STATE.location('NA'), 0x040303),
-        eq(prev(FLAGS.gyonin_primed('NA')), 0),
-        eq(FLAGS.gyonin_primed('NA'), 1),
+        fishmanShop('NA')
       ),
       alt2: define(
         isRegion('JP'),
-        eq(GAME_STATE.location('JP'), 0x040303),
-        eq(prev(FLAGS.gyonin_primed('JP')), 0),
-        eq(FLAGS.gyonin_primed('JP'), 1),
+        fishmanShop('JP')
       )
     }
   });
+
+  const graveyardShortcutOpened = (ll: Locale) => define(
+    eq(GAME_STATE.location(ll), 0x0b0403),
+    eq(prev(FLAGS.graveyard_shortcut(ll)), 0),
+    eq(FLAGS.graveyard_shortcut(ll), 1),
+  );
 
   set.addAchievement({
     title: `Bombs Away!`,
@@ -804,15 +755,11 @@ function makeAchievements(set: AchievementSet) {
           isRegion('NA'),
           isRegion('EU'),
         ),
-        eq(GAME_STATE.location('NA'), 0x0b0403),
-        eq(prev(FLAGS.graveyard_shortcut('NA')), 0),
-        eq(FLAGS.graveyard_shortcut('NA'), 1),
+        graveyardShortcutOpened('NA')
       ),
       alt2: define(
         isRegion('JP'),
-        eq(GAME_STATE.location('JP'), 0x0b0403),
-        eq(prev(FLAGS.graveyard_shortcut('JP')), 0),
-        eq(FLAGS.graveyard_shortcut('JP'), 1),
+        graveyardShortcutOpened('JP')
       )
     }
   });
@@ -1022,6 +969,15 @@ function makeAchievements(set: AchievementSet) {
     }
   });
 
+  const fastFlailWhip = (ll: Locale) => define(
+    eq(GAME_STATE.field_id(ll),    0x0d),
+    eq(GAME_STATE.room_id(ll),     0x05),
+    eq(GAME_STATE.screen_id(ll),   0x00),
+    eq(FLAGS.guardians_defeated(ll), 1),
+    eq(prev(FLAGS.flail_whip(ll)), 0),
+    eq(FLAGS.flail_whip(ll), 1),
+  );
+
   set.addAchievement({
     title: `[Needs title] Fast Flail Whip`,
     description: `Collect the flail whip after defeating only one guardian`,
@@ -1034,25 +990,96 @@ function makeAchievements(set: AchievementSet) {
           isRegion('NA'),
           isRegion('EU'),
         ),
-        eq(GAME_STATE.field_id('NA'),    0x0d),
-        eq(GAME_STATE.room_id('NA'),     0x05),
-        eq(GAME_STATE.screen_id('NA'),   0x00),
-        eq(FLAGS.guardians_defeated('NA'), 1),
-        eq(prev(FLAGS.flail_whip('NA')), 0),
-        eq(FLAGS.flail_whip('NA'), 1),
+        fastFlailWhip('NA'),
       ),
       alt2: define(
         isRegion('JP'),
-        eq(GAME_STATE.field_id('JP'),    0x0d),
-        eq(GAME_STATE.room_id('JP'),     0x05),
-        eq(GAME_STATE.screen_id('JP'),   0x00),
-        eq(FLAGS.guardians_defeated('JP'), 1),
-        eq(prev(FLAGS.flail_whip('JP')), 0),
-        eq(FLAGS.flail_whip('JP'), 1),
+        fastFlailWhip('JP'),
       ),
     }
   });
   
+  const aceConditions = (ll: Locale) => define(
+    // Alsedana requires all Sorbs
+    eq(FLAGS.orb_count(ll), 10),
+    
+    // Skeleton requires all software, Giltoriyo requires La-Mulana, Fobos requires Enga Musica
+    eq(FLAGS_EX.software(0)(ll),  2),
+    eq(FLAGS_EX.software(1)(ll),  1),
+    eq(FLAGS_EX.software(2)(ll),  2),
+    eq(FLAGS_EX.software(3)(ll),  2),
+    eq(FLAGS_EX.software(4)(ll),  2),
+    eq(FLAGS_EX.software(5)(ll),  1),
+    eq(FLAGS_EX.software(6)(ll),  1),
+    eq(FLAGS_EX.software(7)(ll),  1),
+    eq(FLAGS_EX.software(8)(ll),  1),
+    eq(FLAGS_EX.software(9)(ll),  1),
+    eq(FLAGS_EX.software(10)(ll), 1),
+    eq(FLAGS_EX.software(11)(ll), 2),
+    eq(FLAGS_EX.software(12)(ll), 2),
+    eq(FLAGS_EX.software(13)(ll), 2),
+    eq(FLAGS_EX.software(14)(ll), 2),
+    eq(FLAGS_EX.software(15)(ll), 2),
+    eq(FLAGS_EX.software(16)(ll), 2),
+    eq(FLAGS_EX.software(17)(ll), 1),
+    eq(FLAGS_EX.software(18)(ll), 2),
+    eq(FLAGS_EX.software(19)(ll), 2),
+    
+    // Weapon fairy requires all fairy points
+    eq(FLAGS.fairies_counter(ll), 9),
+    
+    // Treasure fairy requires all coin chests
+    eq(FLAGS.coin_chests(ll), 28),
+    
+    // Key fairy requires all key fairy checks
+    eq(FLAGS.key_fairy_checks(ll), 4),
+    
+    // Freyja requires all items
+    ...range( 0, 11).map(n => eq(FLAGS_EX.equip_item(n)(ll), 2)),
+    eq(FLAGS_EX.equip_item(11)(ll), 1),
+    ...range(12, 14).map(n => eq(FLAGS_EX.equip_item(n)(ll), 2)),
+    ...range(15, 18).map(n => eq(FLAGS_EX.equip_item(n)(ll), 2)),
+    ...range(19, 20).map(n => eq(FLAGS_EX.equip_item(n)(ll), 2)),
+    eq(FLAGS_EX.equip_item(11)(ll), 1),
+    ...range(21, 24).map(n => eq(FLAGS_EX.equip_item(n)(ll), 2)),
+    eq(FLAGS_EX.equip_item(24)(ll), 1),
+    ...range(25, 29).map(n => eq(FLAGS_EX.equip_item(n)(ll), 2)),
+    eq(FLAGS.msx2(ll), 2),
+    gt(FLAGS.flail_whip(ll), 0),
+    gt(FLAGS.knife(ll), 0),
+    gt(FLAGS.axe(ll), 0),
+    gt(FLAGS.katana(ll), 0),
+    gt(FLAGS.shuriken(ll), 0),
+    gt(FLAGS.rolly_boys(ll), 0),
+    gt(FLAGS.earth_spear(ll), 0),
+    gt(FLAGS.flare_gun(ll), 0),
+    gt(FLAGS.bomb(ll), 0),
+    gt(FLAGS.chakram(ll), 0),
+    gt(FLAGS.caltrops(ll), 0),
+    gt(FLAGS.pistol(ll), 0),
+    gt(FLAGS.angel_shield(ll), 0),
+    
+    // Nebur requires all maps
+    ...range(0, 17).map(n => eq(FLAGS_EX.map(n)(ll), 2)),
+    
+    // Gyonin requires shop purchase
+    eq(FLAGS.gyonin_primed(ll), 1),
+    
+    // Sacrificial maiden requires all Xelpud emails
+    eq(FLAGS.email_counter(ll), 44),
+    
+    // Mother requires hard mode
+    eq(FLAGS.hard_mode_activated(ll), 1),
+    
+    // Naramura requires all developer rooms
+    eq(FLAGS.naramura_room(ll), 1),
+    eq(FLAGS.duplex_room(ll), 1),
+    eq(FLAGS.samieru_room(ll), 1),
+    
+    // Samaranta, Argus, and Rusalii have speedrun requirements
+    lt(GAME_STATE.in_game_time(ll), timeToMilliseconds({ hours: 10 })),
+  );
+
   set.addAchievement({
     title: `[Needs title] All Characters Ending`,
     description: `Complete the game with all possible characters appearing in the ending sequence`,
@@ -1065,186 +1092,21 @@ function makeAchievements(set: AchievementSet) {
           isRegion('NA'),
           isRegion('EU'),
         ),
-        // Thoth's Room
-        eq(GAME_STATE.field_id('NA'),    0x03),
-        eq(GAME_STATE.room_id('NA'),     0x03),
-        eq(GAME_STATE.screen_id('NA'),   0x00),
-        // Verify all guardians defeated to block laptop glitch shenanigans
-        eq(FLAGS.ankh_amphisbaena('NA'), 0x03),
-        eq(FLAGS.ankh_sakit('NA'),       0x03),
-        eq(FLAGS.ankh_ellmac('NA'),      0x03),
-        eq(FLAGS.ankh_bahamut('NA'),     0x03),
-        eq(FLAGS.ankh_viy('NA'),         0x03),
-        eq(FLAGS.ankh_palenque('NA'),    0x03),
-        eq(FLAGS.ankh_baphomet('NA'),    0x03),
-        eq(FLAGS.ankh_tiamat('NA'),      0x03),
-        eq(FLAGS.mother_defeated('NA'),  0x01),
-        // Since we're using a music trigger for timing, ensure laptop is closed to block the edge
-        // case of using Enga Musica to play 'Run toward the sun' immediately before escaping
-        eq(GAME_STATE.msx_open('NA'), 0x00),
-        // Alsedana requires all Sorbs
-        eq(FLAGS.orb_count('NA'), 10),
-        // Skeleton requires all software, Giltoriyo requires La-Mulana, Fobos requires Enga Musica
-        eq(FLAGS_EX.software(0)('NA'),  2),
-        eq(FLAGS_EX.software(1)('NA'),  1),
-        eq(FLAGS_EX.software(2)('NA'),  2),
-        eq(FLAGS_EX.software(3)('NA'),  2),
-        eq(FLAGS_EX.software(4)('NA'),  2),
-        eq(FLAGS_EX.software(5)('NA'),  1),
-        eq(FLAGS_EX.software(6)('NA'),  1),
-        eq(FLAGS_EX.software(7)('NA'),  1),
-        eq(FLAGS_EX.software(8)('NA'),  1),
-        eq(FLAGS_EX.software(9)('NA'),  1),
-        eq(FLAGS_EX.software(10)('NA'), 1),
-        eq(FLAGS_EX.software(11)('NA'), 2),
-        eq(FLAGS_EX.software(12)('NA'), 2),
-        eq(FLAGS_EX.software(13)('NA'), 2),
-        eq(FLAGS_EX.software(14)('NA'), 2),
-        eq(FLAGS_EX.software(15)('NA'), 2),
-        eq(FLAGS_EX.software(16)('NA'), 2),
-        eq(FLAGS_EX.software(17)('NA'), 1),
-        eq(FLAGS_EX.software(18)('NA'), 2),
-        eq(FLAGS_EX.software(19)('NA'), 2),
-        // Weapon fairy requires all fairy points
-        eq(FLAGS.fairies_counter('NA'), 9),
-        // Treasure fairy requires all coin chests
-        eq(FLAGS.coin_chests('NA'), 28),
-        // Key fairy requires all key fairy checks
-        eq(FLAGS.key_fairy_checks('NA'), 4),
-        // Freyja requires all items
-        ...range( 0, 11).map(n => eq(FLAGS_EX.equip_item(n)('NA'), 2)),
-        eq(FLAGS_EX.equip_item(11)('NA'), 1),
-        ...range(12, 14).map(n => eq(FLAGS_EX.equip_item(n)('NA'), 2)),
-        ...range(15, 18).map(n => eq(FLAGS_EX.equip_item(n)('NA'), 2)),
-        ...range(19, 20).map(n => eq(FLAGS_EX.equip_item(n)('NA'), 2)),
-        eq(FLAGS_EX.equip_item(11)('NA'), 1),
-        ...range(21, 24).map(n => eq(FLAGS_EX.equip_item(n)('NA'), 2)),
-        eq(FLAGS_EX.equip_item(24)('NA'), 1),
-        ...range(25, 29).map(n => eq(FLAGS_EX.equip_item(n)('NA'), 2)),
-        eq(FLAGS.msx2('NA'), 2),
-        gt(FLAGS.flail_whip('NA'), 0),
-        gt(FLAGS.knife('NA'), 0),
-        gt(FLAGS.axe('NA'), 0),
-        gt(FLAGS.katana('NA'), 0),
-        gt(FLAGS.shuriken('NA'), 0),
-        gt(FLAGS.rolly_boys('NA'), 0),
-        gt(FLAGS.earth_spear('NA'), 0),
-        gt(FLAGS.flare_gun('NA'), 0),
-        gt(FLAGS.bomb('NA'), 0),
-        gt(FLAGS.chakram('NA'), 0),
-        gt(FLAGS.caltrops('NA'), 0),
-        gt(FLAGS.pistol('NA'), 0),
-        gt(FLAGS.angel_shield('NA'), 0),
-        // Nebur requires all maps
-        ...range(0, 17).map(n => eq(FLAGS_EX.map(n)('NA'), 2)),
-        // Gyonin requires shop purchase
-        eq(FLAGS.gyonin_primed('NA'), 1),
-        // Sacrificial maiden requires all Xelpud emails
-        eq(FLAGS.email_counter('NA'), 44),
-        // Mother requires hard mode
-        eq(FLAGS.hard_mode_activated('NA'), 1),
-        // Naramura requires all developer rooms
-        eq(FLAGS.naramura_room('NA'), 1),
-        eq(FLAGS.duplex_room('NA'), 1),
-        eq(FLAGS.samieru_room('NA'), 1),
-        // Samaranta, Argus, and Rusalii have speedrun requirements
-        lt(GAME_STATE.in_game_time('NA'), timeToMilliseconds({ hours: 10 })),
-        // CONGRATULATIONS!
-        neq(prev(GAME_STATE.music_id('NA')), 0x2b),
-        eq(GAME_STATE.music_id('NA'), 0x2b)
+        winGameConditions('NA'),
+        aceConditions('NA'),
       ),
       alt2: define(
         isRegion('JP'),
-        // Thoth's Room
-        eq(GAME_STATE.field_id('JP'),    0x03),
-        eq(GAME_STATE.room_id('JP'),     0x03),
-        eq(GAME_STATE.screen_id('JP'),   0x00),
-        // Verify all guardians defeated to block laptop glitch shenanigans
-        eq(FLAGS.ankh_amphisbaena('JP'), 0x03),
-        eq(FLAGS.ankh_sakit('JP'),       0x03),
-        eq(FLAGS.ankh_ellmac('JP'),      0x03),
-        eq(FLAGS.ankh_bahamut('JP'),     0x03),
-        eq(FLAGS.ankh_viy('JP'),         0x03),
-        eq(FLAGS.ankh_palenque('JP'),    0x03),
-        eq(FLAGS.ankh_baphomet('JP'),    0x03),
-        eq(FLAGS.ankh_tiamat('JP'),      0x03),
-        eq(FLAGS.mother_defeated('JP'),  0x01),
-        // Since we're using a music trigger for timing, ensure laptop is closed to block the edge
-        // case of using Enga Musica to play 'Run toward the sun' immediately before escaping
-        eq(GAME_STATE.msx_open('JP'), 0x00),
-        // Alsedana requires all Sorbs
-        eq(FLAGS.orb_count('JP'), 10),
-        // Skeleton requires all software, Giltoriyo requires La-Mulana, Fobos requires Enga Musica
-        eq(FLAGS_EX.software(0)('JP'),  2),
-        eq(FLAGS_EX.software(1)('JP'),  1),
-        eq(FLAGS_EX.software(2)('JP'),  2),
-        eq(FLAGS_EX.software(3)('JP'),  2),
-        eq(FLAGS_EX.software(4)('JP'),  2),
-        eq(FLAGS_EX.software(5)('JP'),  1),
-        eq(FLAGS_EX.software(6)('JP'),  1),
-        eq(FLAGS_EX.software(7)('JP'),  1),
-        eq(FLAGS_EX.software(8)('JP'),  1),
-        eq(FLAGS_EX.software(9)('JP'),  1),
-        eq(FLAGS_EX.software(10)('JP'), 1),
-        eq(FLAGS_EX.software(11)('JP'), 2),
-        eq(FLAGS_EX.software(12)('JP'), 2),
-        eq(FLAGS_EX.software(13)('JP'), 2),
-        eq(FLAGS_EX.software(14)('JP'), 2),
-        eq(FLAGS_EX.software(15)('JP'), 2),
-        eq(FLAGS_EX.software(16)('JP'), 2),
-        eq(FLAGS_EX.software(17)('JP'), 1),
-        eq(FLAGS_EX.software(18)('JP'), 2),
-        eq(FLAGS_EX.software(19)('JP'), 2),
-        // Weapon fairy requires all fairy points
-        eq(FLAGS.fairies_counter('JP'), 9),
-        // Treasure fairy requires all coin chests
-        eq(FLAGS.coin_chests('JP'), 28),
-        // Key fairy requires all key fairy checks
-        eq(FLAGS.key_fairy_checks('JP'), 4),
-        // Freyja requires all items
-        ...range( 0, 11).map(n => eq(FLAGS_EX.equip_item(n)('JP'), 2)),
-        eq(FLAGS_EX.equip_item(11)('JP'), 1),
-        ...range(12, 14).map(n => eq(FLAGS_EX.equip_item(n)('JP'), 2)),
-        ...range(15, 18).map(n => eq(FLAGS_EX.equip_item(n)('JP'), 2)),
-        ...range(19, 20).map(n => eq(FLAGS_EX.equip_item(n)('JP'), 2)),
-        eq(FLAGS_EX.equip_item(11)('JP'), 1),
-        ...range(21, 24).map(n => eq(FLAGS_EX.equip_item(n)('JP'), 2)),
-        eq(FLAGS_EX.equip_item(24)('JP'), 1),
-        ...range(25, 29).map(n => eq(FLAGS_EX.equip_item(n)('JP'), 2)),
-        eq(FLAGS.msx2('JP'), 2),
-        gt(FLAGS.flail_whip('JP'), 0),
-        gt(FLAGS.knife('JP'), 0),
-        gt(FLAGS.axe('JP'), 0),
-        gt(FLAGS.katana('JP'), 0),
-        gt(FLAGS.shuriken('JP'), 0),
-        gt(FLAGS.rolly_boys('JP'), 0),
-        gt(FLAGS.earth_spear('JP'), 0),
-        gt(FLAGS.flare_gun('JP'), 0),
-        gt(FLAGS.bomb('JP'), 0),
-        gt(FLAGS.chakram('JP'), 0),
-        gt(FLAGS.caltrops('JP'), 0),
-        gt(FLAGS.pistol('JP'), 0),
-        gt(FLAGS.angel_shield('JP'), 0),
-        // Nebur requires all maps
-        ...range(0, 17).map(n => eq(FLAGS_EX.map(n)('JP'), 2)),
-        // Gyonin requires shop purchase
-        eq(FLAGS.gyonin_primed('JP'), 1),
-        // Sacrificial maiden requires all Xelpud emails
-        eq(FLAGS.email_counter('JP'), 44),
-        // Mother requires hard mode
-        eq(FLAGS.hard_mode_activated('JP'), 1),
-        // Naramura requires all developer rooms
-        eq(FLAGS.naramura_room('JP'), 1),
-        eq(FLAGS.duplex_room('JP'), 1),
-        eq(FLAGS.samieru_room('JP'), 1),
-        // Samaranta, Argus, and Rusalii have speedrun requirements
-        lt(GAME_STATE.in_game_time('JP'), timeToMilliseconds({ hours: 10 })),
-        // CONGRATULATIONS!
-        neq(prev(GAME_STATE.music_id('JP')), 0x2b),
-        eq(GAME_STATE.music_id('JP'), 0x2b)
+        winGameConditions('JP'),
+        aceConditions('JP'),
       ),
     }
   });
+
+  const argusCredits = (ll: Locale) => define(
+    // Gotta go fast
+    lt(GAME_STATE.in_game_time(ll), timeToMilliseconds({ hours: 20 })),
+  );
 
   set.addAchievement({
     title: `Argus Recognizes Your Skills`,
@@ -1258,58 +1120,22 @@ function makeAchievements(set: AchievementSet) {
           isRegion('NA'),
           isRegion('EU'),
         ),
-        // Thoth's Room
-        eq(GAME_STATE.field_id('NA'),    0x03),
-        eq(GAME_STATE.room_id('NA'),     0x03),
-        eq(GAME_STATE.screen_id('NA'),   0x00),
-        // Verify all guardians defeated to block laptop glitch shenanigans
-        eq(FLAGS.ankh_amphisbaena('NA'), 0x03),
-        eq(FLAGS.ankh_sakit('NA'),       0x03),
-        eq(FLAGS.ankh_ellmac('NA'),      0x03),
-        eq(FLAGS.ankh_bahamut('NA'),     0x03),
-        eq(FLAGS.ankh_viy('NA'),         0x03),
-        eq(FLAGS.ankh_palenque('NA'),    0x03),
-        eq(FLAGS.ankh_baphomet('NA'),    0x03),
-        eq(FLAGS.ankh_tiamat('NA'),      0x03),
-        eq(FLAGS.mother_defeated('NA'),  0x01),
-        // Since we're using a music trigger for timing, ensure laptop is closed to block the edge
-        // case of using Enga Musica to play 'Run toward the sun' immediately before escaping
-        eq(GAME_STATE.msx_open('NA'), 0x00),
-        // Gotta go fast
-        lt(GAME_STATE.in_game_time('NA'), timeToMilliseconds({ hours: 20 })),
-        // CONGRATULATIONS!
-        neq(prev(GAME_STATE.music_id('NA')), 0x2b),
-        eq(GAME_STATE.music_id('NA'), 0x2b)
+        winGameConditions('NA'),
+        argusCredits('NA'),
       ),
       alt2: define(
         isRegion('JP'),
-        // Thoth's Room
-        eq(GAME_STATE.field_id('JP'),    0x03),
-        eq(GAME_STATE.room_id('JP'),     0x03),
-        eq(GAME_STATE.screen_id('JP'),   0x00),
-        // Verify all guardians defeated to block laptop glitch shenanigans
-        eq(FLAGS.ankh_amphisbaena('JP'), 0x03),
-        eq(FLAGS.ankh_sakit('JP'),       0x03),
-        eq(FLAGS.ankh_ellmac('JP'),      0x03),
-        eq(FLAGS.ankh_bahamut('JP'),     0x03),
-        eq(FLAGS.ankh_viy('JP'),         0x03),
-        eq(FLAGS.ankh_palenque('JP'),    0x03),
-        eq(FLAGS.ankh_baphomet('JP'),    0x03),
-        eq(FLAGS.ankh_tiamat('JP'),      0x03),
-        eq(FLAGS.mother_defeated('JP'),  0x01),
-        // Since we're using a music trigger for timing, ensure laptop is closed to block the edge
-        // case of using Enga Musica to play 'Run toward the sun' immediately before escaping
-        eq(GAME_STATE.msx_open('JP'), 0x00),
-        // Gotta go fast
-        lt(GAME_STATE.in_game_time('JP'), timeToMilliseconds({ hours: 20 })),
-        // CONGRATULATIONS!
-        neq(prev(GAME_STATE.music_id('JP')), 0x2b),
-        eq(GAME_STATE.music_id('JP'), 0x2b)
+        winGameConditions('JP'),
+        argusCredits('JP')
       ),
     }
   });
   
-  
+  const sphereless = (ll: Locale) => define(
+    // Utterly orbless behaviour
+    eq(FLAGS.orb_count(ll), 0x00),
+  );
+
   set.addAchievement({
     title: `Sphereless Challenger`,
     description: `Complete the game without collecting any sacred orbs`,
@@ -1322,53 +1148,13 @@ function makeAchievements(set: AchievementSet) {
           isRegion('NA'),
           isRegion('EU'),
         ),
-        // Thoth's Room
-        eq(GAME_STATE.field_id('NA'),    0x03),
-        eq(GAME_STATE.room_id('NA'),     0x03),
-        eq(GAME_STATE.screen_id('NA'),   0x00),
-        // Verify all guardians defeated to block laptop glitch shenanigans
-        eq(FLAGS.ankh_amphisbaena('NA'), 0x03),
-        eq(FLAGS.ankh_sakit('NA'),       0x03),
-        eq(FLAGS.ankh_ellmac('NA'),      0x03),
-        eq(FLAGS.ankh_bahamut('NA'),     0x03),
-        eq(FLAGS.ankh_viy('NA'),         0x03),
-        eq(FLAGS.ankh_palenque('NA'),    0x03),
-        eq(FLAGS.ankh_baphomet('NA'),    0x03),
-        eq(FLAGS.ankh_tiamat('NA'),      0x03),
-        eq(FLAGS.mother_defeated('NA'),  0x01),
-        // Since we're using a music trigger for timing, ensure laptop is closed to block the edge
-        // case of using Enga Musica to play 'Run toward the sun' immediately before escaping
-        eq(GAME_STATE.msx_open('NA'), 0x00),
-        // Utterly orbless behaviour
-        eq(FLAGS.orb_count('NA'), 0x00),
-        // CONGRATULATIONS!
-        neq(prev(GAME_STATE.music_id('NA')), 0x2b),
-        eq(GAME_STATE.music_id('NA'), 0x2b)
+        winGameConditions('NA'),
+        sphereless('NA')
       ),
       alt2: define(
         isRegion('JP'),
-        // Thoth's Room
-        eq(GAME_STATE.field_id('JP'),    0x03),
-        eq(GAME_STATE.room_id('JP'),     0x03),
-        eq(GAME_STATE.screen_id('JP'),   0x00),
-        // Verify all guardians defeated to block laptop glitch shenanigans
-        eq(FLAGS.ankh_amphisbaena('JP'), 0x03),
-        eq(FLAGS.ankh_sakit('JP'),       0x03),
-        eq(FLAGS.ankh_ellmac('JP'),      0x03),
-        eq(FLAGS.ankh_bahamut('JP'),     0x03),
-        eq(FLAGS.ankh_viy('JP'),         0x03),
-        eq(FLAGS.ankh_palenque('JP'),    0x03),
-        eq(FLAGS.ankh_baphomet('JP'),    0x03),
-        eq(FLAGS.ankh_tiamat('JP'),      0x03),
-        eq(FLAGS.mother_defeated('JP'),  0x01),
-        // Since we're using a music trigger for timing, ensure laptop is closed to block the edge
-        // case of using Enga Musica to play 'Run toward the sun' immediately before escaping
-        eq(GAME_STATE.msx_open('JP'), 0x00),
-        // Utterly orbless behaviour
-        eq(FLAGS.orb_count('JP'), 0x00),
-        // CONGRATULATIONS!
-        neq(prev(GAME_STATE.music_id('JP')), 0x2b),
-        eq(GAME_STATE.music_id('JP'), 0x2b)
+        winGameConditions('JP'),
+        sphereless('JP')
       ),
     }
   });

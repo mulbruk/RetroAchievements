@@ -1,8 +1,8 @@
 import { RichPresence, define, orNext } from '@cruncheevos/core';
 
-import { cond, eq, neq, gt, gte, lt, lte } from '../common/comparison.js';
-import { byte, tbyte_be } from '../common/value.js';
-import { richPresenceLookup } from '../common/rich-presence.js';
+import { cond, eq, neq, gt, gte, lt, lte } from '../../common/comparison.js';
+import { byte, tbyte_be } from '../../common/value.js';
+import { richPresenceLookup } from '../../common/rich-presence.js';
 
 import { fieldData, FLAGS_EN, GAME_STATE_EN, roomData } from './data.js';
 

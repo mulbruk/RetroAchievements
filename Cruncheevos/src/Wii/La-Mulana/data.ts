@@ -1,6 +1,6 @@
 import { Condition } from "@cruncheevos/core";
 import { match } from "ts-pattern";
-import { byte, dword_be, bit1, bit3, bit5, bit6, float_be, word_be, bit2, tbyte_be, bit0 } from "../common/value.js";
+import { byte, dword_be, bit1, bit3, bit5, bit6, float_be, word_be, bit2, tbyte_be, bit0 } from "../../common/value.js";
 
 // ---------------------------------------------------------------------------------------------------
 
